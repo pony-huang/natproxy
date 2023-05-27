@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.github.ponking66</groupId>
+        <artifactId>nat-proxy</artifactId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+    <artifactId>build</artifactId>
+
+    <properties>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+        <distribute.path>appassembler</distribute.path>
+        <application.name>natproxy</application.name>
+    </properties>
+
+    <dependencies>
+
+        <dependency>
+            <groupId>org.github.ponking66</groupId>
+            <artifactId>natproxy-client</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.github.ponking66</groupId>
+            <artifactId>natproxy-server</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+
+    </dependencies>
+
+    <build>
+        <finalName>${project.artifactId}</finalName>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+            </resource>
+        </resources>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>appassembler-maven-plugin</artifactId>
+                <version>2.1.0</version>
+                <executions>
+                    <execution>
+                        <id>make-assembly</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>assemble</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <platforms>
+                        <platform>unix</platform>
+                        <platform>windows</platform>
+                    </platforms>
+                    <assembleDirectory>${user.dir}/${distribute.path}/${application.name}</assembleDirectory>
+                    <repositoryName>lib</repositoryName>
+                    <binFolder>bin</binFolder>
+                    <configurationDirectory>conf</configurationDirectory>
+                    <copyConfigurationDirectory>true</copyConfigurationDirectory>
+                    <configurationSourceDirectory>src/main/resources</configurationSourceDirectory>
+                    <includeConfigurationDirectoryInClasspath>true</includeConfigurationDirectoryInClasspath>
+                    <repositoryLayout>flat</repositoryLayout>
+                    <encoding>UTF-8</encoding>
+                    <programs>
+                        <program>
+                            <mainClass>org.github.ponking66.ServerApplication</mainClass>
+                            <id>server</id>
+                            <jvmSettings>
+                                <extraArguments>
+                                    <extraArgument>-Xms128M</extraArgument>
+                                    <extraArgument>-Xmx128M</extraArgument>
+                                    <extraArgument>-Xss256k</extraArgument>
+                                </extraArguments>
+                            </jvmSettings>
+                        </program>
+                        <program>
+                            <mainClass>org.github.ponking66.ClientApplication</mainClass>
+                            <id>client</id>
+                            <jvmSettings>
+                                <extraArguments>
+                                    <extraArgument>-Xms128M</extraArgument>
+                                    <extraArgument>-Xmx128M</extraArgument>
+                                    <extraArgument>-Xss256k</extraArgument>
+                                </extraArguments>
+                            </jvmSettings>
+                        </program>
+                    </programs>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

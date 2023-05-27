@@ -1,0 +1,5 @@
+server:
+  host: 127.0.0.1
+  port: 20001
+client:
+  key: 721b2e485683bd87c32f3c208f787a626c7397a759146a93be30e15ad3193084
