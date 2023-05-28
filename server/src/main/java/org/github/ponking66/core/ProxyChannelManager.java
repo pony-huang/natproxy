@@ -241,7 +241,6 @@ public class ProxyChannelManager {
         if (ports == null) {
             throw new IllegalArgumentException("port can not be null");
         }
-
         // 保证服务器对外端口与客户端到服务器的连接关系在临界情况时调用removeChannel(Channel channel)时不出问题
         // ConcurrentHashMap的线程安全指的是，它的每个方法单独调用（即原子操作）都是线程安全的
         // 如果有两个线程分别调用put和remove方法，就无法保证线程安全了
@@ -250,10 +249,9 @@ public class ProxyChannelManager {
                 portCmdChannelMapping.put(port, cmdChannel);
             }
         }
-
         cmdChannel.attr(CHANNEL_PORT).set(ports);
         cmdChannel.attr(CHANNEL_CLIENT_KEY).set(clientKey);
-        cmdChannel.attr(USER_CHANNELS).set(new ConcurrentHashMap<String, Channel>());
+        cmdChannel.attr(USER_CHANNELS).set(new ConcurrentHashMap<>());
         // 缓存 cmdChannel
         cmdChannels.put(clientKey, cmdChannel);
     }

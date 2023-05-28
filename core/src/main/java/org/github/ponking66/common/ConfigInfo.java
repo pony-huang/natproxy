@@ -35,14 +35,14 @@ public class ConfigInfo {
                     Constructor constructor = new Constructor(ConfigInfo.class);
                     Yaml yaml = new Yaml(constructor);
                     InputStream is;
-                    String path = System.getProperty("config.path");
+                    String path = System.getProperty(ProxyConfig.ENV_PROPERTIES_PATH);
                     if (!ObjectUtils.isEmpty(path)) {
                         is = new FileInputStream(path);
-                    } else if (!ObjectUtils.isEmpty(System.getProperty("config.filename"))) {
-                        String filename = System.getProperty("config.filename");
+                    } else if (!ObjectUtils.isEmpty(System.getProperty(ProxyConfig.ENV_PROPERTIES_CONFIG_FILE_NAME))) {
+                        String filename = System.getProperty(ProxyConfig.ENV_PROPERTIES_CONFIG_FILE_NAME);
                         is = ResourceUtils.getResourceAsStream(filename);
                     } else {
-                        is = ResourceUtils.getResourceAsStream("setting.yaml");
+                        is = ResourceUtils.getResourceAsStream(ProxyConfig.ENV_PROPERTIES_GLOBAL_CONFIG_FILE_NAME);
                     }
                     CONFIG_INFO = yaml.load(is);
                     return CONFIG_INFO;

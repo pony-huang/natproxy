@@ -46,8 +46,8 @@ public class ClientApplication {
     private final AtomicInteger errorTimes = new AtomicInteger(0);
 
     static {
-        System.setProperty("config.filename", ProxyConfig.CLIENT_CONFIG_FILENAME);
-        System.setProperty("log.filename", ProxyConfig.CLIENT_FILE_LOG);
+        System.setProperty(ProxyConfig.ENV_PROPERTIES_CONFIG_FILE_NAME, ProxyConfig.CLIENT_CONFIG_FILENAME);
+        System.setProperty(ProxyConfig.ENV_PROPERTIES_LOG_FILE_NAME, ProxyConfig.CLIENT_FILE_LOG);
     }
 
     public static void main(String[] args) throws FileNotFoundException, InterruptedException {
@@ -72,10 +72,10 @@ public class ClientApplication {
                         pipeline.addLast(new NettyMessageEncoder());
                         pipeline.addLast(new IdleStateHandler(ProxyConfig.READER_IDLE_TIME_SECONDS, ProxyConfig.WRITER_IDLE_TIME_SECONDS, ProxyConfig.ALL_IDLE_TIME_SECONDS));
                         pipeline.addLast(new ClientLoginAuthHandler());
+                        pipeline.addLast(new HeartBeatClientHandler());
                         pipeline.addLast(new ClientDisconnectHandler(ClientApplication.this));
                         pipeline.addLast(new ClientTunnelBindHandler(proxyServerBootstrap));
                         pipeline.addLast(new ClientTunnelTransferHandler());
-                        pipeline.addLast(new HeartBeatClientHandler());
                     }
                 });
     }

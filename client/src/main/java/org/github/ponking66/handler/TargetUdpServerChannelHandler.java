@@ -62,20 +62,7 @@ public class TargetUdpServerChannelHandler extends SimpleChannelInboundHandler<D
 
 
     /**
-     * <pre>平衡读写速度，防止内存占用过多，出现OOM；</pre>
-     * <p>
-     * 例如：当netty用于转发，就是从proxyServerChannel读数据，往TargetServerChannel写数据时，如果读写速度差距过大，容易造成OOM。
-     *
-     * <pre>
-     * netty提供了两个标志，用来判断缓冲区的使用情况:
-     * WRITE_BUFFER_HIGH_WATER_MARK;
-     * WRITE_BUFFER_LOW_WATER_MARK
-     * </pre>
-     * <p>
-     * 1 当缓冲区水位达到高警戒线时就会触发channelWritabilityChanged回调函数，在这里注销掉对读事件的监听关闭tcp窗口；
-     * 2 等水位降下来到低警戒线时再触发channelWritabilityChanged回调函数，就把读事件再给注册上去。
-     *
-     * @see <a href="https://www.cnblogs.com/fq0121104930716/p/12878583.html"></a>
+     * 平衡读写速度，防止内存占用过多，出现OOM
      */
     @Override
     public void channelWritabilityChanged(ChannelHandlerContext ctx) throws Exception {

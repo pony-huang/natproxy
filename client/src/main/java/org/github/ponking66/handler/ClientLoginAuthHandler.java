@@ -11,7 +11,6 @@ import org.github.ponking66.protoctl.NettyMessage;
  */
 public class ClientLoginAuthHandler extends BaseHandler {
 
-
     @Override
     public void handleRead(ChannelHandlerContext ctx, NettyMessage message) {
         if (message.getHeader().getStatus() != 200) {
@@ -20,6 +19,7 @@ public class ClientLoginAuthHandler extends BaseHandler {
         } else {
             ClientChannelManager.setCmdChannel(ctx.channel());
             LOGGER.info("Login success!");
+            ctx.fireChannelRead(message);
         }
     }
 

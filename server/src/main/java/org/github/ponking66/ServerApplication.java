@@ -32,8 +32,8 @@ public class ServerApplication {
     protected final Logger LOGGER = LoggerFactory.getLogger(ServerApplication.class);
 
     static {
-        System.setProperty("config.filename", ProxyConfig.SERVER_CONFIG_FILENAME);
-        System.setProperty("log.filename", ProxyConfig.SERVER_FILE_LOG);
+        System.setProperty(ProxyConfig.ENV_PROPERTIES_CONFIG_FILE_NAME, ProxyConfig.SERVER_CONFIG_FILENAME);
+        System.setProperty(ProxyConfig.ENV_PROPERTIES_LOG_FILE_NAME, ProxyConfig.SERVER_FILE_LOG);
     }
 
     public static void main(String[] args) {
@@ -51,10 +51,10 @@ public class ServerApplication {
                     pipeline.addLast(new NettyMessageEncoder());
                     pipeline.addLast(new IdleStateHandler(ProxyConfig.READER_IDLE_TIME_SECONDS, ProxyConfig.WRITER_IDLE_TIME_SECONDS, ProxyConfig.ALL_IDLE_TIME_SECONDS));
                     pipeline.addLast(new ServerLoginAuthHandler(Arrays.asList(tcpBootstrapApplication, udpBootstrapApplication)));
+                    pipeline.addLast(new HeartBeatServerHandler());
                     pipeline.addLast(new ServerDisconnectHandler());
                     pipeline.addLast(new ServerTunnelConnectHandler());
                     pipeline.addLast(new ServerTunnelTransferHandler());
-                    pipeline.addLast(new HeartBeatServerHandler());
 
                 }
             });

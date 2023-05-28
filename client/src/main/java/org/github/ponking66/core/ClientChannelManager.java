@@ -88,7 +88,7 @@ public class ClientChannelManager {
                                 // 绑定关系
                                 handler.success(future.channel(), null);
                             } else {
-                                LOGGER.warn("connect proxy server failed", future.cause());
+                                LOGGER.warn("Failed to connect proxy server, cause: ", future.cause());
                                 // 通知代理服务器关闭此代理服务（关闭端口监听）
                                 handler.error(future.channel(), future.cause());
                             }
@@ -113,7 +113,7 @@ public class ClientChannelManager {
             proxyChannel.attr(AttrConstants.BIND_CHANNEL).set(null);
             // 添加到连接池队尾
             PROXY_CHANNEL_POOL.offer(proxyChannel);
-            LOGGER.debug("return ProxyChanel to the pool, channel is {}, pool current size is {} ", proxyChannel, PROXY_CHANNEL_POOL.size());
+            LOGGER.debug("Return ProxyChanel in the pool, channel is {}, pool current size is {} ", proxyChannel, PROXY_CHANNEL_POOL.size());
         }
     }
 

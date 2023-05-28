@@ -22,6 +22,14 @@ public class ProxyConfig {
 
     public static final String CLIENT_FILE_LOG = "client.log";
 
+    public static final String ENV_PROPERTIES_CONFIG_FILE_NAME = "config.filename";
+
+    public static final String ENV_PROPERTIES_LOG_FILE_NAME = "log.filename";
+
+    public static final String ENV_PROPERTIES_PATH = "config.path";
+
+    public static final String ENV_PROPERTIES_GLOBAL_CONFIG_FILE_NAME = "setting.yaml";
+
     public static final int READER_IDLE_TIME_SECONDS = 10;
     public static final int WRITER_IDLE_TIME_SECONDS = 0;
     public static final int ALL_IDLE_TIME_SECONDS = 0;
