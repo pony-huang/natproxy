@@ -76,7 +76,6 @@ public class ClientApplication {
                         pipeline.addLast(new ClientTunnelTransferHandler());
                         pipeline.addLast(new ClientDisconnectHandler(ClientApplication.this));
                         pipeline.addLast(new HeartBeatClientHandler());
-
                     }
                 });
     }
