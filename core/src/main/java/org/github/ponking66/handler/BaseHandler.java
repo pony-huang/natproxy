@@ -20,9 +20,6 @@ public abstract class BaseHandler extends SimpleChannelInboundHandler<NettyMessa
     protected void channelRead0(ChannelHandlerContext ctx, NettyMessage message) throws Exception {
         byte type = message.getHeader().getType();
         if (type == getMessageType()) {
-            if (!ctx.channel().isWritable()) {
-                TimeUnit.SECONDS.sleep(5);
-            }
             handleRead(ctx, message);
         } else {
             ctx.fireChannelRead(message);

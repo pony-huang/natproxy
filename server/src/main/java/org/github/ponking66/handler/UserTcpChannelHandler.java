@@ -11,6 +11,8 @@ import org.github.ponking66.pojo.TransferRep;
 import org.github.ponking66.protoctl.Header;
 import org.github.ponking66.protoctl.MessageType;
 import org.github.ponking66.protoctl.NettyMessage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
 
@@ -26,22 +28,28 @@ import java.net.InetSocketAddress;
  */
 public class UserTcpChannelHandler extends AbstractUserChannelHandler<ByteBuf> {
 
+    protected final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
+
     @Override
     public void handleChannelRead(ChannelHandlerContext ctx, ByteBuf msg) {
         Channel userChannel = ctx.channel();
-        Channel proxyChannel = userChannel.attr(AttrConstants.BIND_CHANNEL).get();
-        if (proxyChannel == null) {
-            // 如果没有对应的代理客户端，直接关闭连接
-            ctx.close();
+        if (userChannel.isActive() && userChannel.isWritable()) {
+            Channel proxyChannel = userChannel.attr(AttrConstants.BIND_CHANNEL).get();
+            if (proxyChannel == null) {
+                // 如果没有对应的代理客户端，直接关闭连接
+                ctx.close();
+            } else {
+                byte[] data = new byte[msg.readableBytes()];
+                msg.readBytes(data);
+                String userId = ProxyChannelManager.getUserChannelUserId(userChannel);
+                NettyMessage proxyMessage = new NettyMessage();
+                proxyMessage.setHeader(new Header().setType(MessageType.TRANSFER_REQUEST));
+                TransferRep rep = new TransferRep(userId, data);
+                proxyMessage.setBody(rep);
+                proxyChannel.writeAndFlush(proxyMessage);
+            }
         } else {
-            byte[] data = new byte[msg.readableBytes()];
-            msg.readBytes(data);
-            String userId = ProxyChannelManager.getUserChannelUserId(userChannel);
-            NettyMessage proxyMessage = new NettyMessage();
-            proxyMessage.setHeader(new Header().setType(MessageType.TRANSFER_REQUEST));
-            TransferRep rep = new TransferRep(userId, data);
-            proxyMessage.setBody(rep);
-            proxyChannel.writeAndFlush(proxyMessage);
+            LOGGER.error("Message dropped.");
         }
     }
 

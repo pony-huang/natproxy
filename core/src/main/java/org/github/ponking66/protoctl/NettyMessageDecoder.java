@@ -72,8 +72,9 @@ public class NettyMessageDecoder extends LengthFieldBasedFrameDecoder {
             nettyMessage.setBody(decodeObject(frame));
         }
         nettyMessage.setHeader(header);
-
         LOGGER.info("Receive Message, type: {}, sessionID: {}", header.getType(), header.getSessionID());
+        // 防止内存泄露
+        frame.release();
         return nettyMessage;
     }
 
@@ -88,8 +89,6 @@ public class NettyMessageDecoder extends LengthFieldBasedFrameDecoder {
             in.readerIndex(in.readerIndex() + objectSize);
             return obj;
         } finally {
-            unmarshaller.clearClassCache();
-            unmarshaller.clearInstanceCache();
             unmarshaller.close();
         }
     }

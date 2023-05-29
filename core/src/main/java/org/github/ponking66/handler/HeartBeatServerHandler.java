@@ -2,6 +2,8 @@ package org.github.ponking66.handler;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.handler.timeout.IdleState;
+import io.netty.handler.timeout.IdleStateEvent;
 import org.github.ponking66.protoctl.Header;
 import org.github.ponking66.protoctl.MessageType;
 import org.github.ponking66.protoctl.NettyMessage;
@@ -20,10 +22,23 @@ public class HeartBeatServerHandler extends SimpleChannelInboundHandler<NettyMes
     protected void channelRead0(ChannelHandlerContext ctx, NettyMessage message) throws Exception {
         if (message.getHeader().getType() == MessageType.HEARTBEAT_REQUEST) {
             LOGGER.info("Receive client heart beat message.");
-            ctx.writeAndFlush(buildHeatBeat());
-            LOGGER.info("Send heart beat response message to client.");
+//            ctx.writeAndFlush(buildHeatBeat());
+//            LOGGER.info("Send heart beat response message to client.");
         } else {
             ctx.fireChannelRead(message);
+        }
+    }
+
+    @Override
+    public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
+        if (evt instanceof IdleStateEvent) {
+            IdleState state = ((IdleStateEvent) evt).state();
+            if (state == IdleState.READER_IDLE) {
+                LOGGER.warn("channel first read timeout {}", ctx.channel());
+                ctx.disconnect();
+            }
+        } else {
+            super.userEventTriggered(ctx, evt);
         }
     }
 
