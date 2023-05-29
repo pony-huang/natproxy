@@ -6,6 +6,8 @@ import org.github.ponking66.protoctl.NettyMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.concurrent.TimeUnit;
+
 /**
  * @author pony
  * @date 2023/4/28
@@ -18,6 +20,9 @@ public abstract class BaseHandler extends SimpleChannelInboundHandler<NettyMessa
     protected void channelRead0(ChannelHandlerContext ctx, NettyMessage message) throws Exception {
         byte type = message.getHeader().getType();
         if (type == getMessageType()) {
+            if (!ctx.channel().isWritable()) {
+                TimeUnit.SECONDS.sleep(5);
+            }
             handleRead(ctx, message);
         } else {
             ctx.fireChannelRead(message);

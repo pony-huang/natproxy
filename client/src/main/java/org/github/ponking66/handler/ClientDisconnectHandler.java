@@ -7,7 +7,6 @@ import io.netty.channel.ChannelHandlerContext;
 import org.github.ponking66.ClientApplication;
 import org.github.ponking66.common.AttrConstants;
 import org.github.ponking66.core.ClientChannelManager;
-import org.github.ponking66.protoctl.Header;
 import org.github.ponking66.protoctl.MessageType;
 import org.github.ponking66.protoctl.NettyMessage;
 
@@ -46,18 +45,29 @@ public class ClientDisconnectHandler extends BaseHandler {
         return MessageType.DISCONNECT;
     }
 
+    /**
+     * 销毁控制连接的channel，回收数据连接的channel
+     */
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-        Channel cmdChannel = ClientChannelManager.getCmdChannel();
-        if (ctx.channel() != cmdChannel) {
-            NettyMessage proxyMessage = new NettyMessage();
-            proxyMessage.setHeader(new Header().setType(MessageType.DISCONNECT));
-            ctx.writeAndFlush(proxyMessage);
-            LOGGER.info("Notice the proxy Server channel.");
-        } else {
+        Channel proxyServerChannel = ctx.channel();
+        // 如果控制连接的channel close了
+        if (proxyServerChannel == ClientChannelManager.getCmdChannel()) {
+            // GC 控制连接的channel
+            ClientChannelManager.setCmdChannel(null);
+            // 通知所有的真实服务器close socket，关闭所有和真实服务器的channel
+            ClientChannelManager.clearTargetServerChannels();
+            // 尝试重连代理服务器
             clientApplication.connect();
-            LOGGER.info("CmdChannel retry connect.");
+        } else {
+            // 如果是数据传输的channel，则直接关闭
+            Channel realServerChannel = ctx.channel().attr(AttrConstants.BIND_CHANNEL).get();
+            if (realServerChannel != null && realServerChannel.isActive()) {
+                realServerChannel.close();
+            }
         }
+        // 移除连接池中的channel
+        ClientChannelManager.removeProxyChannel(proxyServerChannel);
         super.channelInactive(ctx);
     }
 

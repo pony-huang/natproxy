@@ -77,7 +77,10 @@ public final class NettyMessageEncoder extends MessageToByteEncoder<NettyMessage
             marshaller.finish();
             out.setInt(lengthPos, out.writerIndex() - lengthPos - 4);
         } finally {
+            marshaller.clearClassCache();
+            marshaller.clearInstanceCache();
             marshaller.close();
+
         }
     }
 }

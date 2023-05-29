@@ -32,13 +32,11 @@ public class ClientTunnelTransferHandler extends BaseHandler {
                 buf.writeBytes(data);
 
                 if (targetServerChannel instanceof NioDatagramChannel) {
-
                     InetSocketAddress proxySeverRemoteAddress = rep.getRemoteAddress();
                     InetSocketAddress targetSeverLocalAddress = (InetSocketAddress) targetServerChannel.remoteAddress();
                     ClientChannelManager.bindMappedAddress(targetSeverLocalAddress, proxySeverRemoteAddress);
                     DatagramPacket packet = new DatagramPacket(buf, targetSeverLocalAddress);
                     targetServerChannel.writeAndFlush(packet);
-
                     LOGGER.debug("Write data to target server. {}", targetServerChannel);
                 } else if (targetServerChannel instanceof NioSocketChannel) {
                     targetServerChannel.writeAndFlush(buf);
@@ -46,7 +44,6 @@ public class ClientTunnelTransferHandler extends BaseHandler {
                 } else {
                     LOGGER.warn("Illegal channel, cannot transfer. {}", targetServerChannel);
                 }
-
                 LOGGER.debug("Write data to target server. {}", targetServerChannel);
             } else {
                 LOGGER.warn("Parameter error. {}", targetServerChannel);

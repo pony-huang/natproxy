@@ -34,7 +34,7 @@ public class ClientChannelManager {
     /**
      * 和代理服务器的连接池的Channel的最大数量
      */
-    private static final int MAX_POOL_SIZE = 100;
+    private static final int MAX_POOL_SIZE = 10;
 
     /**
      * 和代理服务器的Channel的连接池
@@ -98,7 +98,7 @@ public class ClientChannelManager {
     }
 
     /**
-     * 解除proxyChannel和目标服务器的关系，归还 channel 给代理连接池
+     * 解除proxyChannel和目标服务器的关系，归还channel给代理连接池
      *
      * @param proxyChannel proxyChannel
      */
@@ -160,10 +160,10 @@ public class ClientChannelManager {
      * 添加 channel
      *
      * @param userId              channel 唯一标示
-     * @param TargetServerChannel TargetServerChannel
+     * @param targetServerChannel targetServerChannel
      */
-    public static void addTargetServerChannel(String userId, Channel TargetServerChannel) {
-        TARGET_SERVER_CHANNELS.put(userId, TargetServerChannel);
+    public static void addTargetServerChannel(String userId, Channel targetServerChannel) {
+        TARGET_SERVER_CHANNELS.put(userId, targetServerChannel);
     }
 
     /**

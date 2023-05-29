@@ -1,10 +1,7 @@
 package org.github.ponking66;
 
 import io.netty.bootstrap.ServerBootstrap;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelPipeline;
-import io.netty.channel.EventLoopGroup;
+import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
@@ -43,20 +40,22 @@ public class ServerApplication {
         UsersApplication udpBootstrapApplication = new UsersUdpBootstrapApplication(workerGroup);
         try {
             ServerBootstrap bootstrap = new ServerBootstrap();
-            bootstrap.group(bossGroup, workerGroup).channel(NioServerSocketChannel.class).handler(new LoggingHandler(LogLevel.INFO)).childHandler(new ChannelInitializer<SocketChannel>() {
-                @Override
-                protected void initChannel(SocketChannel ch) throws Exception {
-                    ChannelPipeline pipeline = ch.pipeline();
-                    pipeline.addLast(new NettyMessageDecoder());
-                    pipeline.addLast(new NettyMessageEncoder());
-                    pipeline.addLast(new IdleStateHandler(ProxyConfig.READER_IDLE_TIME_SECONDS, ProxyConfig.WRITER_IDLE_TIME_SECONDS, ProxyConfig.ALL_IDLE_TIME_SECONDS));
-                    pipeline.addLast(new ServerLoginAuthHandler(Arrays.asList(tcpBootstrapApplication, udpBootstrapApplication)));
-                    pipeline.addLast(new ServerDisconnectHandler());
-                    pipeline.addLast(new ServerTunnelConnectHandler());
-                    pipeline.addLast(new ServerTunnelTransferHandler());
-                    pipeline.addLast(new HeartBeatServerHandler());
-                }
-            });
+            bootstrap.group(bossGroup, workerGroup).channel(NioServerSocketChannel.class)
+                    .handler(new LoggingHandler(LogLevel.INFO)).childHandler(new ChannelInitializer<SocketChannel>() {
+                        @Override
+                        protected void initChannel(SocketChannel ch) throws Exception {
+                            ChannelPipeline pipeline = ch.pipeline();
+                            pipeline.addLast(new NettyMessageDecoder());
+                            pipeline.addLast(new NettyMessageEncoder());
+                            pipeline.addLast(new IdleStateHandler(ProxyConfig.READER_IDLE_TIME_SECONDS, ProxyConfig.WRITER_IDLE_TIME_SECONDS, ProxyConfig.ALL_IDLE_TIME_SECONDS));
+                            pipeline.addLast(new ServerLoginAuthHandler(Arrays.asList(tcpBootstrapApplication, udpBootstrapApplication)));
+                            pipeline.addLast(new ServerDisconnectHandler());
+                            pipeline.addLast(new ServerTunnelConnectHandler());
+                            pipeline.addLast(new ServerTunnelTransferHandler());
+//                            pipeline.addLast(new ServerStatisticsChannelHandler());
+                            pipeline.addLast(new HeartBeatServerHandler());
+                        }
+                    });
 
             Channel channel = bootstrap.bind(ProxyConfig.getServerPort()).sync().channel();
             channel.closeFuture().sync();

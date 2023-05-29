@@ -64,13 +64,13 @@ public class TargetTcpServerChannelHandler extends SimpleChannelInboundHandler<B
      */
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-        Channel TargetServerChannel = ctx.channel();
-        String userId = ClientChannelManager.getTargetServerChannelUserId(TargetServerChannel);
+        Channel targetServerChannel = ctx.channel();
+        String userId = ClientChannelManager.getTargetServerChannelUserId(targetServerChannel);
         // 关闭移除 TargetServerChannel
         ClientChannelManager.removeTargetServerChannel(userId);
-        Channel proxyServerChannel = TargetServerChannel.attr(AttrConstants.BIND_CHANNEL).get();
+        Channel proxyServerChannel = targetServerChannel.attr(AttrConstants.BIND_CHANNEL).get();
         if (proxyServerChannel != null) {
-            LOGGER.debug("channelInactive, {}", TargetServerChannel);
+            LOGGER.debug("channelInactive, {}", targetServerChannel);
             NettyMessage message = new NettyMessage();
             message.setHeader(new Header().setType(MessageType.DISCONNECT));
             CloseChannelRep rep = new CloseChannelRep(userId, ProxyConfig.client().getKey());

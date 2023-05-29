@@ -182,7 +182,7 @@ public class ProxyChannelManager {
      * @param channel cmdChannel
      */
     public static void removeCmdChannel(Channel channel) {
-        LOGGER.warn("channel closed, clear user channels, {}", channel);
+        LOGGER.warn("Proxy channel closed, clear user channels, {}", channel);
         // 如果 cmdChannel 没有开放任何端口
         if (channel.attr(CHANNEL_PORT).get() == null) {
             return;
@@ -211,13 +211,13 @@ public class ProxyChannelManager {
             channel.close();
         }
 
-        // 关闭 和cmdChannel 关联的所有userChannel
+        // 关闭与cmdChannel关联的所有userChannel
         Map<String, Channel> userChannels = getUserChannels(channel);
         for (String s : userChannels.keySet()) {
             Channel userChannel = userChannels.get(s);
             if (userChannel.isActive()) {
                 userChannel.close();
-                LOGGER.info("disconnect user channel {}", userChannel);
+                LOGGER.info("Disconnect user channel {}", userChannel);
             }
         }
 

@@ -33,7 +33,7 @@ public class NettyMessageDecoder extends LengthFieldBasedFrameDecoder {
     }
 
     public NettyMessageDecoder() {
-        this(1024 * 1024, 4, 4, -8, 0);
+        this(1024 * 1024 * 4, 4, 4, -8, 0);
     }
 
     public NettyMessageDecoder(int maxFrameLength, int lengthFieldOffset, int lengthFieldLength, int lengthAdjustment, int initialBytesToStrip) {
@@ -88,7 +88,15 @@ public class NettyMessageDecoder extends LengthFieldBasedFrameDecoder {
             in.readerIndex(in.readerIndex() + objectSize);
             return obj;
         } finally {
+            unmarshaller.clearClassCache();
+            unmarshaller.clearInstanceCache();
             unmarshaller.close();
         }
+    }
+
+    @Override
+    public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
+//        ctx.flush();
+        super.channelReadComplete(ctx);
     }
 }
