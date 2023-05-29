@@ -18,10 +18,13 @@ import org.github.ponking66.protoctl.ProtocType;
 public class ClientTunnelBindHandler extends BaseHandler {
 
     /**
-     * TargetServerListener 目标服务器相关的启动器
+     * TCP协议相关的目标服务器相关的启动器
      */
     protected final TargetServerListener tcpTargetSeverListener;
 
+    /**
+     * UDP协议相关的目标服务器相关的启动器
+     */
     protected final TargetServerListener udpTargetSeverListener;
 
     public ClientTunnelBindHandler(Bootstrap proxyServerBootstrap) {

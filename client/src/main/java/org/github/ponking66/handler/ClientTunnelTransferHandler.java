@@ -1,6 +1,7 @@
 package org.github.ponking66.handler;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelOption;
@@ -24,35 +25,37 @@ public class ClientTunnelTransferHandler extends BaseHandler {
     @Override
     public void handleRead(ChannelHandlerContext ctx, NettyMessage message) {
         Channel targetServerChannel = ctx.channel().attr(AttrConstants.BIND_CHANNEL).get();
-        if (targetServerChannel != null) {
-            if (message.getBody() instanceof TransferRep rep) {
-
+        if (targetServerChannel == null) {
+            LOGGER.warn("TargetServerChannel is null");
+            return;
+        }
+        if ((message.getBody() instanceof TransferRep rep)) {
+            if (targetServerChannel instanceof NioDatagramChannel) {
                 byte[] data = rep.getContent();
-                ByteBuf buf = ctx.alloc().buffer(data.length);
+                ByteBuf buf = Unpooled.buffer(data.length);
                 buf.writeBytes(data);
-
-                if (targetServerChannel instanceof NioDatagramChannel) {
-                    InetSocketAddress proxySeverRemoteAddress = rep.getRemoteAddress();
-                    InetSocketAddress targetSeverLocalAddress = (InetSocketAddress) targetServerChannel.remoteAddress();
-                    ClientChannelManager.bindMappedAddress(targetSeverLocalAddress, proxySeverRemoteAddress);
-                    DatagramPacket packet = new DatagramPacket(buf, targetSeverLocalAddress);
-                    targetServerChannel.writeAndFlush(packet);
-                    LOGGER.debug("Write data to target server. {}", targetServerChannel);
-                } else if (targetServerChannel instanceof NioSocketChannel) {
-                    targetServerChannel.writeAndFlush(buf);
-                    LOGGER.debug("Write data to target server. {}", targetServerChannel);
-                } else {
-                    LOGGER.warn("Illegal channel, cannot transfer. {}", targetServerChannel);
-                }
-                LOGGER.debug("Write data to target server. {}", targetServerChannel);
+                InetSocketAddress proxySeverRemoteAddress = rep.getRemoteAddress();
+                InetSocketAddress targetSeverLocalAddress = (InetSocketAddress) targetServerChannel.remoteAddress();
+                ClientChannelManager.bindMappedAddress(targetSeverLocalAddress, proxySeverRemoteAddress);
+                DatagramPacket packet = new DatagramPacket(buf, targetSeverLocalAddress);
+                targetServerChannel.writeAndFlush(packet);
+            } else if (targetServerChannel instanceof NioSocketChannel) {
+                byte[] data = rep.getContent();
+                ByteBuf buf = Unpooled.buffer(data.length);
+                buf.writeBytes(data);
+                targetServerChannel.writeAndFlush(buf);
             } else {
-                LOGGER.warn("Parameter error. {}", targetServerChannel);
+                LOGGER.warn("Illegal channel, cannot transfer. {}", targetServerChannel);
+                return;
             }
+            LOGGER.debug("Write data to target server. {}", targetServerChannel);
+        } else {
+            LOGGER.warn("Parameter error, message body: {}", message.getBody().getClass());
         }
     }
 
     /**
-     * <pre>平衡读写速度，防止内存占用过多，出现OOM。</pre>
+     * 平衡读写速度，防止内存占用过多出现OOM
      */
     @Override
     public void channelWritabilityChanged(ChannelHandlerContext ctx) throws Exception {

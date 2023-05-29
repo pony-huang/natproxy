@@ -2,8 +2,6 @@ package org.github.ponking66.handler;
 
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelOption;
-import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.socket.DatagramPacket;
 import org.github.ponking66.common.AttrConstants;
 import org.github.ponking66.core.ClientChannelManager;
@@ -23,7 +21,7 @@ import java.net.InetSocketAddress;
  * @author pony
  * @date 2023/4/28
  */
-public class TargetUdpServerChannelHandler extends SimpleChannelInboundHandler<DatagramPacket> {
+public class TargetUdpServerChannelHandler extends AbstractTargetServerChannelHandler<DatagramPacket> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TargetUdpServerChannelHandler.class);
 
@@ -60,25 +58,4 @@ public class TargetUdpServerChannelHandler extends SimpleChannelInboundHandler<D
         LOGGER.debug("UDP proxy, write data to proxy server, {}, {}", targetServerChannel, proxyServerChannel);
     }
 
-
-    /**
-     * 平衡读写速度，防止内存占用过多，出现OOM
-     */
-    @Override
-    public void channelWritabilityChanged(ChannelHandlerContext ctx) throws Exception {
-        Channel targetServerChannel = ctx.channel();
-        Channel proxyServerChannel = targetServerChannel.attr(AttrConstants.BIND_CHANNEL).get();
-        if (proxyServerChannel != null) {
-            boolean writable = targetServerChannel.isWritable();
-            LOGGER.debug("TargetServerChannel is Writable: {}", writable);
-            proxyServerChannel.config().setOption(ChannelOption.AUTO_READ, writable);
-        }
-        super.channelWritabilityChanged(ctx);
-    }
-
-    @Override
-    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        LOGGER.error("exception caught", cause);
-        super.exceptionCaught(ctx, cause);
-    }
 }
