@@ -23,7 +23,7 @@ import java.net.InetSocketAddress;
  */
 public class TargetUdpServerChannelHandler extends AbstractTargetServerChannelHandler<DatagramPacket> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(TargetUdpServerChannelHandler.class);
+    protected final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
 
     /**
      * 读取 目标服务器的消息，写给 代理服务器

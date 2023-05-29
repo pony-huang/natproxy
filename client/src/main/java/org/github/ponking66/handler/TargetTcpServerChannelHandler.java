@@ -22,7 +22,7 @@ import org.slf4j.LoggerFactory;
  */
 public class TargetTcpServerChannelHandler extends AbstractTargetServerChannelHandler<ByteBuf> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(TargetTcpServerChannelHandler.class);
+    protected final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
