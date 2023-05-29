@@ -66,12 +66,12 @@ public class TargetUdpServerChannelHandler extends SimpleChannelInboundHandler<D
      */
     @Override
     public void channelWritabilityChanged(ChannelHandlerContext ctx) throws Exception {
-        Channel TargetServerChannel = ctx.channel();
-        Channel proxyServerChannel = TargetServerChannel.attr(AttrConstants.BIND_CHANNEL).get();
+        Channel targetServerChannel = ctx.channel();
+        Channel proxyServerChannel = targetServerChannel.attr(AttrConstants.BIND_CHANNEL).get();
         if (proxyServerChannel != null) {
-            // 如果 TargetServerChannel 缓存区达到 WRITE_BUFFER_HIGH_WATER_MARK
-            // 则，注销掉 proxyServerChannel 的读事件;
-            proxyServerChannel.config().setOption(ChannelOption.AUTO_READ, TargetServerChannel.isWritable());
+            boolean writable = targetServerChannel.isWritable();
+            LOGGER.debug("TargetServerChannel is Writable: {}", writable);
+            proxyServerChannel.config().setOption(ChannelOption.AUTO_READ, writable);
         }
         super.channelWritabilityChanged(ctx);
     }

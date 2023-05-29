@@ -33,7 +33,7 @@ public class NettyMessageDecoder extends LengthFieldBasedFrameDecoder {
     }
 
     public NettyMessageDecoder() {
-        this(1024 * 1024 * 10, 4, 4, -8, 0);
+        this(1024 * 1024, 4, 4, -8, 0);
     }
 
     public NettyMessageDecoder(int maxFrameLength, int lengthFieldOffset, int lengthFieldLength, int lengthAdjustment, int initialBytesToStrip) {

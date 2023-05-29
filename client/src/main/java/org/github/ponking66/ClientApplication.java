@@ -72,10 +72,11 @@ public class ClientApplication {
                         pipeline.addLast(new NettyMessageEncoder());
                         pipeline.addLast(new IdleStateHandler(ProxyConfig.READER_IDLE_TIME_SECONDS, ProxyConfig.WRITER_IDLE_TIME_SECONDS, ProxyConfig.ALL_IDLE_TIME_SECONDS));
                         pipeline.addLast(new ClientLoginAuthHandler());
-                        pipeline.addLast(new HeartBeatClientHandler());
-                        pipeline.addLast(new ClientDisconnectHandler(ClientApplication.this));
                         pipeline.addLast(new ClientTunnelBindHandler(proxyServerBootstrap));
                         pipeline.addLast(new ClientTunnelTransferHandler());
+                        pipeline.addLast(new ClientDisconnectHandler(ClientApplication.this));
+                        pipeline.addLast(new HeartBeatClientHandler());
+
                     }
                 });
     }

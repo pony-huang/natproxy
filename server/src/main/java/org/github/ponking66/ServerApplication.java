@@ -51,11 +51,10 @@ public class ServerApplication {
                     pipeline.addLast(new NettyMessageEncoder());
                     pipeline.addLast(new IdleStateHandler(ProxyConfig.READER_IDLE_TIME_SECONDS, ProxyConfig.WRITER_IDLE_TIME_SECONDS, ProxyConfig.ALL_IDLE_TIME_SECONDS));
                     pipeline.addLast(new ServerLoginAuthHandler(Arrays.asList(tcpBootstrapApplication, udpBootstrapApplication)));
-                    pipeline.addLast(new HeartBeatServerHandler());
                     pipeline.addLast(new ServerDisconnectHandler());
                     pipeline.addLast(new ServerTunnelConnectHandler());
                     pipeline.addLast(new ServerTunnelTransferHandler());
-
+                    pipeline.addLast(new HeartBeatServerHandler());
                 }
             });
 

@@ -88,10 +88,8 @@ public class TargetTcpServerChannelHandler extends SimpleChannelInboundHandler<B
         Channel targetServerChannel = ctx.channel();
         Channel proxyServerChannel = targetServerChannel.attr(AttrConstants.BIND_CHANNEL).get();
         if (proxyServerChannel != null) {
-            // 如果 targetServerChannel 缓存区达到 WRITE_BUFFER_HIGH_WATER_MARK
-            // 则，注销掉 proxyServerChannel 的读事件;
             boolean writable = targetServerChannel.isWritable();
-            LOGGER.debug("TargetServerChannel isWritable: {}", writable);
+            LOGGER.debug("TargetServerChannel is Writable: {}", writable);
             proxyServerChannel.config().setOption(ChannelOption.AUTO_READ, writable);
         }
         super.channelWritabilityChanged(ctx);

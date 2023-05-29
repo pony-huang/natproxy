@@ -38,6 +38,7 @@ public abstract class AbstractUserChannelHandler<T> extends SimpleChannelInbound
      */
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
+
         Channel userChannel = ctx.channel();
         // 用户请求的监听端口
         InetSocketAddress localAddress = (InetSocketAddress) userChannel.localAddress();
@@ -66,20 +67,21 @@ public abstract class AbstractUserChannelHandler<T> extends SimpleChannelInbound
 
 
     /**
-     * 平衡读写速度，防止内存占用过多，出现OOM
+     * 平衡用户channel和代理客户端channel的读写速度，防止OOM
      */
     @Override
     public void channelWritabilityChanged(ChannelHandlerContext ctx) throws Exception {
         Channel userChannel = ctx.channel();
-        InetSocketAddress sa = (InetSocketAddress) userChannel.localAddress();
-        Channel cmdChannel = ProxyChannelManager.getCmdChannel(sa.getPort());
+        Channel cmdChannel = ProxyChannelManager.getCmdChannel(((InetSocketAddress) userChannel.localAddress()).getPort());
         if (cmdChannel == null) {
             // 该端口还没有代理客户端
             ctx.close();
         } else {
-            Channel proxyChannel = userChannel.attr(AttrConstants.BIND_CHANNEL).get();
-            if (proxyChannel != null) {
-                proxyChannel.config().setOption(ChannelOption.AUTO_READ, userChannel.isWritable());
+            Channel proxyServerChannel = userChannel.attr(AttrConstants.BIND_CHANNEL).get();
+            if (proxyServerChannel != null) {
+                boolean writable = userChannel.isWritable();
+                LOGGER.debug("UserChannel is Writable: {}", writable);
+                proxyServerChannel.config().setOption(ChannelOption.AUTO_READ, writable);
             }
         }
         super.channelWritabilityChanged(ctx);

@@ -3,12 +3,12 @@ package org.github.ponking66.handler;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelOption;
 import io.netty.channel.socket.DatagramPacket;
 import io.netty.channel.socket.nio.NioDatagramChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import org.github.ponking66.common.AttrConstants;
 import org.github.ponking66.core.ClientChannelManager;
-import org.github.ponking66.pojo.ProxyTunnelInfoReq;
 import org.github.ponking66.pojo.TransferRep;
 import org.github.ponking66.protoctl.MessageType;
 import org.github.ponking66.protoctl.NettyMessage;
@@ -52,6 +52,21 @@ public class ClientTunnelTransferHandler extends BaseHandler {
                 LOGGER.warn("Parameter error. {}", targetServerChannel);
             }
         }
+    }
+
+    /**
+     * <pre>平衡读写速度，防止内存占用过多，出现OOM。</pre>
+     */
+    @Override
+    public void channelWritabilityChanged(ChannelHandlerContext ctx) throws Exception {
+        Channel proxyServerChannel = ctx.channel();
+        Channel targetServerChannel = proxyServerChannel.attr(AttrConstants.BIND_CHANNEL).get();
+        if (targetServerChannel != null) {
+            boolean writable = proxyServerChannel.isWritable();
+            LOGGER.debug("ProxyServerChannel is Writable: {}", writable);
+            targetServerChannel.config().setOption(ChannelOption.AUTO_READ, writable);
+        }
+        super.channelWritabilityChanged(ctx);
     }
 
     @Override
