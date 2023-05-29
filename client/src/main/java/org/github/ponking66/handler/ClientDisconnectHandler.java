@@ -61,9 +61,9 @@ public class ClientDisconnectHandler extends BaseHandler {
             clientApplication.connect();
         } else {
             // 如果是数据传输的channel，则直接关闭
-            Channel realServerChannel = ctx.channel().attr(AttrConstants.BIND_CHANNEL).get();
-            if (realServerChannel != null && realServerChannel.isActive()) {
-                realServerChannel.close();
+            Channel targetServerChannel = proxyServerChannel.attr(AttrConstants.BIND_CHANNEL).get();
+            if (targetServerChannel != null && targetServerChannel.isActive()) {
+                targetServerChannel.close();
             }
         }
         // 移除连接池中的channel
