@@ -36,12 +36,13 @@ public class ClientTunnelBindHandler extends BaseHandler {
     public void handleRead(ChannelHandlerContext ctx, NettyMessage message) {
         ProxyTunnelInfoReq proxyTunnelInfoReq = (ProxyTunnelInfoReq) message.getBody();
         Channel cmdChannel = ctx.channel();
-        if (ProtocType.TCP.equals(proxyTunnelInfoReq.getType())) {
+        String type = proxyTunnelInfoReq.getType();
+        if (ProtocType.TCP.equals(type)) {
             tcpTargetSeverListener.listen(cmdChannel, message);
-        } else if (ProtocType.UDP.equals(proxyTunnelInfoReq.getType())) {
+        } else if (ProtocType.UDP.equals(type)) {
             udpTargetSeverListener.listen(cmdChannel, message);
         } else {
-            LOGGER.warn("Illegal agreement");
+            LOGGER.warn("Illegal agreement. ProtocType value is {}", type);
         }
 
     }
