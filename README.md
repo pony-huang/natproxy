@@ -14,12 +14,9 @@
    mvn clean package -Dmaven.test.skip=true
     ```
 3. Run
-   1. 
-   ```shell
-   cd ../appassembler/natproxy
-    ```
-   2. run client on the proxy client.
-   3. run server on the proxy server.
+   1. `cd ../appassembler/natproxy`
+   2. `run client on the proxy client.` 
+   3. `run server on the proxy server.`
       
 # Change Log
 
