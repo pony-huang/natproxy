@@ -1,14 +1,10 @@
 package org.github.ponking66.core;
 
-import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
-import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelOption;
 import org.github.ponking66.common.AttrConstants;
-import org.github.ponking66.common.ProxyConfig;
-import org.github.ponking66.handler.TunnelResultHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,40 +57,9 @@ public class ClientChannelManager {
         ClientChannelManager.cmdChannel = cmdChannel;
     }
 
-    /**
-     * 代理客户端和目标服务器建立通道后调用此方法；
-     * 开启 代理客户端和代理服务端 映射隧道；
-     * 然后，绑定 目标服务器和代理服务器的 的映射关系
-     *
-     * @param proxyServerBootstrap 建立代理客户端和代理服务器连接的启动器
-     * @param handler              建立隧道的监听器
-     */
-    public static void borrowProxyChanel(Bootstrap proxyServerBootstrap, final TunnelResultHandler handler) {
-        // 返回并移除队列队头的channel
-        Channel channel = PROXY_CHANNEL_POOL.poll();
-        // 如果有可用的channel
-        if (channel != null) {
-            // 绑定 隧道映射关系
-            // 目标服务器<--->代理客户端；代理客户端<--->代理服务器
-            handler.success(channel, null);
-        } else {
-            // 建立隧道
-            proxyServerBootstrap.connect(ProxyConfig.getServerHost(), ProxyConfig.getServerPort())
-                    .addListener(new ChannelFutureListener() {
-                        @Override
-                        public void operationComplete(ChannelFuture future) throws Exception {
-                            // 连接成功
-                            if (future.isSuccess()) {
-                                // 绑定关系
-                                handler.success(future.channel(), null);
-                            } else {
-                                LOGGER.warn("Failed to connect proxy server, cause: ", future.cause());
-                                // 通知代理服务器关闭此代理服务（关闭端口监听）
-                                handler.error(future.channel(), future.cause());
-                            }
-                        }
-                    });
-        }
+
+    public static Channel poolChannel() {
+        return PROXY_CHANNEL_POOL.poll();
     }
 
     /**

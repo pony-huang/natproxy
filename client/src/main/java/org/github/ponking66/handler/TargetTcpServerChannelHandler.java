@@ -52,7 +52,7 @@ public class TargetTcpServerChannelHandler extends AbstractTargetServerChannelHa
         TransferResp resp = new TransferResp(userId, data);
         message.setBody(resp);
         proxyServerChannel.writeAndFlush(message);
-        LOGGER.debug("TCP proxy, write data to proxy server, {}, {}", targetServerChannel, proxyServerChannel);
+        LOGGER.debug("TCP proxy, write data to proxy server, {} ---> {}", targetServerChannel.remoteAddress(), proxyServerChannel.remoteAddress());
     }
 
     /**
@@ -66,7 +66,7 @@ public class TargetTcpServerChannelHandler extends AbstractTargetServerChannelHa
         ClientChannelManager.removeTargetServerChannel(userId);
         Channel proxyServerChannel = targetServerChannel.attr(AttrConstants.BIND_CHANNEL).get();
         if (proxyServerChannel != null) {
-            LOGGER.debug("channelInactive, {}", targetServerChannel);
+            LOGGER.debug("TargetServerChannel disconnect, {}", targetServerChannel);
             NettyMessage message = new NettyMessage();
             message.setHeader(new Header().setType(MessageType.DISCONNECT));
             CloseChannelRep rep = new CloseChannelRep(userId, ProxyConfig.client().getKey());

@@ -8,7 +8,6 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.timeout.IdleStateHandler;
-import org.github.ponking66.common.ConfigInfo;
 import org.github.ponking66.common.ProxyConfig;
 import org.github.ponking66.handler.*;
 import org.github.ponking66.protoctl.*;
@@ -50,11 +49,8 @@ public class ClientApplication {
         System.setProperty(ProxyConfig.ENV_PROPERTIES_LOG_FILE_NAME, ProxyConfig.CLIENT_FILE_LOG);
     }
 
-    public static void main(String[] args) throws FileNotFoundException, InterruptedException {
-        ConfigInfo instance = ConfigInfo.getInstance();
-        String host = instance.getServer().getHost();
-        int port = instance.getServer().getPort();
-        new ClientApplication(host, port).connect();
+    public static void main(String[] args) throws InterruptedException {
+        new ClientApplication(ProxyConfig.getServerHost(), ProxyConfig.getServerPort()).connect();
     }
 
     public ClientApplication(String host, int port) {
@@ -63,7 +59,6 @@ public class ClientApplication {
         EventLoopGroup workerGroup = new NioEventLoopGroup();
         proxyServerBootstrap.group(workerGroup)
                 .channel(NioSocketChannel.class)
-                .handler(new LoggingHandler(LogLevel.INFO))
                 .handler(new ChannelInitializer<SocketChannel>() {
                     @Override
                     protected void initChannel(SocketChannel ch) throws Exception {
@@ -82,52 +77,45 @@ public class ClientApplication {
 
     public void connect() throws InterruptedException {
         ChannelFuture cf = proxyServerBootstrap.connect(host, port);
-        executor.execute(new Runnable() {
-            @Override
-            public void run() {
-                while (!success) {
-                    try {
-                        TimeUnit.SECONDS.sleep(1);
-                        if (!success) {
-                            LOGGER.info("Connection wait");
-                        }
-                    } catch (InterruptedException e) {
-                        throw new RuntimeException(e);
+        executor.execute(() -> {
+            while (!success) {
+                try {
+                    TimeUnit.SECONDS.sleep(1);
+                    if (!success) {
+                        LOGGER.info("Connection wait");
                     }
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
                 }
             }
         });
 
-        cf.addListener(new ChannelFutureListener() {
+        cf.addListener((ChannelFutureListener) future -> {
+            Channel channel = future.channel();
+            if (future.isSuccess()) {
+                LOGGER.info("Successful connection");
+                // Reset
+                success = true;
+                errorTimes.set(0);
+                // Login
+                String value = ProxyConfig.client().getKey();
+                NettyMessage message = new NettyMessage();
+                message.setHeader(new Header().setType(MessageType.LOGIN_REQUEST));
+                message.setBody(value);
+                channel.writeAndFlush(message);
 
-            @Override
-            public void operationComplete(ChannelFuture future) throws Exception {
-                Channel channel = future.channel();
-                if (future.isSuccess()) {
-                    LOGGER.info("Successful connection");
-                    // Reset
-                    success = true;
-                    errorTimes.set(0);
-                    // Login
-                    String value = ProxyConfig.client().getKey();
-                    NettyMessage message = new NettyMessage();
-                    message.setHeader(new Header().setType(MessageType.LOGIN_REQUEST));
-                    message.setBody(value);
-                    channel.writeAndFlush(message);
-
-                } else {
-                    LOGGER.info("Connection failure");
-                    channel.eventLoop().schedule(() -> {
-                        LOGGER.info("Try retry connection");
-                        try {
-                            connect();
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    }, delay(), TimeUnit.MILLISECONDS);
-                    success = false;
-                    errorTimes.incrementAndGet();
-                }
+            } else {
+                LOGGER.info("Connection failure");
+                channel.eventLoop().schedule(() -> {
+                    LOGGER.info("Try retry connection");
+                    try {
+                        connect();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }, delay(), TimeUnit.MILLISECONDS);
+                success = false;
+                errorTimes.incrementAndGet();
             }
         });
         cf.channel().closeFuture().sync();

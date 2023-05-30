@@ -55,7 +55,7 @@ public class TargetUdpServerChannelHandler extends AbstractTargetServerChannelHa
         message.setBody(resp);
 
         proxyServerChannel.writeAndFlush(message);
-        LOGGER.debug("UDP proxy, write data to proxy server, {}, {}", targetServerChannel, proxyServerChannel);
+        LOGGER.debug("UDP proxy, write data to proxy server, {} ---> {}", targetServerChannel.remoteAddress(), proxyServerChannel.remoteAddress());
     }
 
 }
