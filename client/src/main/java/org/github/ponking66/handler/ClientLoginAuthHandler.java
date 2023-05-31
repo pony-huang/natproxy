@@ -2,12 +2,16 @@ package org.github.ponking66.handler;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.util.concurrent.ScheduledFuture;
+
+import org.github.ponking66.Application;
 import org.github.ponking66.core.ClientChannelManager;
+import org.github.ponking66.pojo.LoginResp;
 import org.github.ponking66.protoctl.Header;
 import org.github.ponking66.protoctl.MessageType;
 import org.github.ponking66.protoctl.NettyMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 
 import java.util.concurrent.TimeUnit;
 
@@ -20,10 +24,18 @@ public class ClientLoginAuthHandler extends BaseHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(ClientLoginAuthHandler.class);
     private volatile ScheduledFuture<?> heartBeat;
 
+    private final Application clientApplication;
+
+    public ClientLoginAuthHandler(Application clientApplication) {
+        this.clientApplication = clientApplication;
+    }
+
     @Override
-    public void handleRead(ChannelHandlerContext ctx, NettyMessage message) {
+    public void handleRead(ChannelHandlerContext ctx, NettyMessage message) throws Exception {
         if (message.getHeader().getStatus() != 200) {
-            LOGGER.info("Login failed!");
+            LoginResp resp = (LoginResp) message.getBody();
+            LOGGER.info("Login failed, reason: {}", resp.getError());
+            clientApplication.stop();
             ctx.close();
         } else {
             ClientChannelManager.setCmdChannel(ctx.channel());

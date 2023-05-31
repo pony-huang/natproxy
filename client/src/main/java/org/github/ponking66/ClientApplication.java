@@ -8,13 +8,15 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.timeout.IdleStateHandler;
+
 import org.github.ponking66.common.ProxyConfig;
 import org.github.ponking66.handler.*;
+import org.github.ponking66.pojo.LoginRep;
 import org.github.ponking66.protoctl.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.FileNotFoundException;
+
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -25,14 +27,16 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author pony
  * @date 2023/5/9
  */
-public class ClientApplication {
+public class ClientApplication implements Application {
 
     private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
 
     /**
-     * 和代理服务器相关的启动器
+     * 代理服务器启动器
      */
     private final Bootstrap proxyServerBootstrap = new Bootstrap();
+
+    private final EventLoopGroup workerGroup;
 
     private final String host;
 
@@ -50,15 +54,16 @@ public class ClientApplication {
     }
 
     public static void main(String[] args) throws InterruptedException {
-        new ClientApplication(ProxyConfig.getServerHost(), ProxyConfig.getServerPort()).connect();
+        new ClientApplication(ProxyConfig.getServerHost(), ProxyConfig.getServerPort()).start();
     }
 
     public ClientApplication(String host, int port) {
         this.port = port;
         this.host = host;
-        EventLoopGroup workerGroup = new NioEventLoopGroup();
+        workerGroup = new NioEventLoopGroup();
         proxyServerBootstrap.group(workerGroup)
                 .channel(NioSocketChannel.class)
+                .handler(new LoggingHandler(LogLevel.INFO))
                 .handler(new ChannelInitializer<SocketChannel>() {
                     @Override
                     protected void initChannel(SocketChannel ch) throws Exception {
@@ -66,10 +71,11 @@ public class ClientApplication {
                         pipeline.addLast(new NettyMessageDecoder());
                         pipeline.addLast(new NettyMessageEncoder());
                         pipeline.addLast(new IdleStateHandler(ProxyConfig.READER_IDLE_TIME_SECONDS, ProxyConfig.WRITER_IDLE_TIME_SECONDS, ProxyConfig.ALL_IDLE_TIME_SECONDS));
-                        pipeline.addLast(new ClientLoginAuthHandler());
+                        pipeline.addLast(new ClientCenterHandler(ClientApplication.this));
+                        pipeline.addLast(new ClientLoginAuthHandler(ClientApplication.this));
                         pipeline.addLast(new ClientTunnelBindHandler(proxyServerBootstrap));
                         pipeline.addLast(new ClientTunnelTransferHandler());
-                        pipeline.addLast(new ClientDisconnectHandler(ClientApplication.this));
+                        pipeline.addLast(new ClientDisconnectHandler());
                         pipeline.addLast(new HeartBeatClientHandler());
                     }
                 });
@@ -89,7 +95,6 @@ public class ClientApplication {
                 }
             }
         });
-
         cf.addListener((ChannelFutureListener) future -> {
             Channel channel = future.channel();
             if (future.isSuccess()) {
@@ -98,10 +103,9 @@ public class ClientApplication {
                 success = true;
                 errorTimes.set(0);
                 // Login
-                String value = ProxyConfig.client().getKey();
                 NettyMessage message = new NettyMessage();
                 message.setHeader(new Header().setType(MessageType.LOGIN_REQUEST));
-                message.setBody(value);
+                message.setBody(new LoginRep(ProxyConfig.client().getKey()));
                 channel.writeAndFlush(message);
 
             } else {
@@ -130,6 +134,20 @@ public class ClientApplication {
             return delay * 1000L;
         } else {
             return 1000L * 10;
+        }
+    }
+
+    @Override
+    public void start() throws InterruptedException {
+        connect();
+    }
+
+    @Override
+    public void stop() throws Exception {
+        try {
+            workerGroup.shutdownGracefully();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }

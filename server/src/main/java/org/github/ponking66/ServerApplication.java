@@ -5,9 +5,8 @@ import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.handler.logging.LogLevel;
-import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.timeout.IdleStateHandler;
+
 import org.github.ponking66.common.ProxyConfig;
 import org.github.ponking66.core.UsersApplication;
 import org.github.ponking66.core.UsersTcpBootstrapApplication;
@@ -18,13 +17,14 @@ import org.github.ponking66.protoctl.NettyMessageEncoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+
 import java.util.Arrays;
 
 /**
  * @author pony
  * @date 2023/5/9
  */
-public class ServerApplication {
+public class ServerApplication implements Application {
 
     protected final Logger LOGGER = LoggerFactory.getLogger(ServerApplication.class);
 
@@ -33,7 +33,13 @@ public class ServerApplication {
         System.setProperty(ProxyConfig.ENV_PROPERTIES_LOG_FILE_NAME, ProxyConfig.SERVER_FILE_LOG);
     }
 
-    public static void main(String[] args) {
+
+    public static void main(String[] args) throws Exception {
+        new ServerApplication().start();
+    }
+
+    @Override
+    public void start() throws Exception {
         EventLoopGroup bossGroup = new NioEventLoopGroup();
         EventLoopGroup workerGroup = new NioEventLoopGroup();
         UsersApplication tcpBootstrapApplication = new UsersTcpBootstrapApplication(bossGroup, workerGroup);
@@ -67,7 +73,10 @@ public class ServerApplication {
             bossGroup.shutdownGracefully();
             workerGroup.shutdownGracefully();
         }
-
     }
 
+    @Override
+    public void stop() throws Exception {
+        throw new UnsupportedOperationException();
+    }
 }
