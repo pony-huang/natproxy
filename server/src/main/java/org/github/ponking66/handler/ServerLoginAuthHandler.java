@@ -15,13 +15,11 @@ import java.util.List;
 
 /**
  * 处理代理客户端授权，
- * 请求必 uri=clientKey（代理客户端秘钥）
  *
  * @author pony
  * @date 2023/4/28
  */
 public class ServerLoginAuthHandler extends BaseHandler {
-
 
     private final List<UsersApplication> usersApplications;
 
@@ -34,11 +32,11 @@ public class ServerLoginAuthHandler extends BaseHandler {
         if (message.getBody() instanceof LoginRep rep) {
             String clientKey = rep.getClientKey();
             if (!ProxyConfig.server().getKeys().contains(clientKey)) {
-                LOGGER.info("Authentication failure!");
+                LOGGER.info("Authentication failure");
                 ctx.writeAndFlush(buildResponse(LoginResp.RespError.CLIENT_KEY_ERROR, Header.Status.FAILED));
                 ctx.close();
             } else {
-                LOGGER.info("Authentication success!");
+                LOGGER.info("Authentication success");
                 bindProxySeverChannel(ctx, clientKey);
             }
         } else {

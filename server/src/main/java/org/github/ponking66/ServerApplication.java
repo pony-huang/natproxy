@@ -26,7 +26,9 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -43,35 +45,31 @@ public class ServerApplication implements Application {
     }
 
     private final EventLoopGroup bossGroup = new NioEventLoopGroup();
-
     private final EventLoopGroup workerGroup = new NioEventLoopGroup();
 
-    private final UsersApplication tcpBootstrapApplication;
-
-    private final UsersApplication udpBootstrapApplication;
+    private final List<UsersApplication> usersApplications;
 
     public static void main(String[] args) throws Exception {
         new ServerApplication().start();
     }
 
     public ServerApplication() {
-        tcpBootstrapApplication = new UsersTcpBootstrapApplication(bossGroup, workerGroup);
-        udpBootstrapApplication = new UsersUdpBootstrapApplication(workerGroup);
+        usersApplications = Arrays.asList(new UsersTcpBootstrapApplication(bossGroup, workerGroup), new UsersUdpBootstrapApplication(workerGroup));
     }
 
     @Override
     public void start() throws Exception {
-        simpleServer();
+        initBootstrapServer();
         TLSConfig tls = ProxyConfig.server().getTls();
         if (tls != null && tls.isEnable() &&
                 ObjectUtils.isNotEmpty(tls.getCaFile()) &&
                 ObjectUtils.isNotEmpty(tls.getKeyFile()) &&
                 ObjectUtils.isNotEmpty(tls.getKeyCertChainFile())) {
-            initSSLServer(tls);
+            initSSLBootstrapServer(tls);
         }
     }
 
-    private void simpleServer() throws IOException, InterruptedException, ExecutionException {
+    private void initBootstrapServer() throws IOException, InterruptedException, ExecutionException {
         ServerBootstrap bootstrap = new ServerBootstrap();
         bootstrap.group(bossGroup, workerGroup).channel(NioServerSocketChannel.class)
                 .handler(new LoggingHandler(LogLevel.INFO))
@@ -80,20 +78,13 @@ public class ServerApplication implements Application {
                     @Override
                     protected void initChannel(SocketChannel ch) throws Exception {
                         ChannelPipeline pipeline = ch.pipeline();
-                        pipeline.addLast(new NettyMessageDecoder());
-                        pipeline.addLast(new NettyMessageEncoder());
-                        pipeline.addLast(new IdleStateHandler(ProxyConfig.READER_IDLE_TIME_SECONDS, ProxyConfig.WRITER_IDLE_TIME_SECONDS, ProxyConfig.ALL_IDLE_TIME_SECONDS));
-                        pipeline.addLast(new ServerLoginAuthHandler(Arrays.asList(tcpBootstrapApplication, udpBootstrapApplication)));
-                        pipeline.addLast(new ServerDisconnectHandler());
-                        pipeline.addLast(new ServerTunnelConnectHandler());
-                        pipeline.addLast(new ServerTunnelTransferHandler());
-                        pipeline.addLast(new HeartBeatServerHandler());
+                        initCommonHandlers(pipeline);
                     }
                 });
         bootstrap.bind(ProxyConfig.getServerPort()).get();
     }
 
-    public void initSSLServer(TLSConfig tls) throws InterruptedException, IOException, ExecutionException {
+    public void initSSLBootstrapServer(TLSConfig tls) throws InterruptedException, IOException, ExecutionException {
 
         File crt = new File(tls.getKeyCertChainFile());
         File key = new File(tls.getKeyFile());
@@ -110,18 +101,22 @@ public class ServerApplication implements Application {
                     protected void initChannel(SocketChannel ch) throws Exception {
                         ChannelPipeline pipeline = ch.pipeline();
                         pipeline.addLast(new SslHandler(sslContext.newEngine(ch.alloc())));
-                        pipeline.addLast(new NettyMessageDecoder());
-                        pipeline.addLast(new NettyMessageEncoder());
-                        pipeline.addLast(new IdleStateHandler(ProxyConfig.READER_IDLE_TIME_SECONDS, ProxyConfig.WRITER_IDLE_TIME_SECONDS, ProxyConfig.ALL_IDLE_TIME_SECONDS));
-                        pipeline.addLast(new ServerLoginAuthHandler(Arrays.asList(tcpBootstrapApplication, udpBootstrapApplication)));
-                        pipeline.addLast(new ServerDisconnectHandler());
-                        pipeline.addLast(new ServerTunnelConnectHandler());
-                        pipeline.addLast(new ServerTunnelTransferHandler());
-                        pipeline.addLast(new HeartBeatServerHandler());
+                        initCommonHandlers(pipeline);
                     }
                 });
 
         bootstrap.bind(tls.getPort()).get();
+    }
+
+    private void initCommonHandlers(ChannelPipeline pipeline) throws IOException {
+        pipeline.addLast(new NettyMessageDecoder());
+        pipeline.addLast(new NettyMessageEncoder());
+        pipeline.addLast(new IdleStateHandler(ProxyConfig.READER_IDLE_TIME_SECONDS, ProxyConfig.WRITER_IDLE_TIME_SECONDS, ProxyConfig.ALL_IDLE_TIME_SECONDS));
+        pipeline.addLast(new ServerLoginAuthHandler(usersApplications));
+        pipeline.addLast(new ServerDisconnectHandler());
+        pipeline.addLast(new ServerTunnelConnectHandler());
+        pipeline.addLast(new ServerTunnelTransferHandler());
+        pipeline.addLast(new HeartBeatServerHandler());
     }
 
     @Override
