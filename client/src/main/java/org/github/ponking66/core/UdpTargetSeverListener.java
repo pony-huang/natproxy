@@ -22,12 +22,12 @@ public class UdpTargetSeverListener implements TargetServerListener {
     protected final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
 
     /**
-     * 代理客户端和目标服务器的 启动器
+     * 代理客户端目标服务器的启动器
      */
     protected final Bootstrap targetServerBootstrap = new Bootstrap();
 
     /**
-     * 代理客户端和代理服务器的 启动器
+     * 代理客户端代理服务器的启动器
      */
     protected final Bootstrap proxyServerBootstrap;
 

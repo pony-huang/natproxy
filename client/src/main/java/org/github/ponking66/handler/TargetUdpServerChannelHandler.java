@@ -27,7 +27,7 @@ public class TargetUdpServerChannelHandler extends AbstractTargetServerChannelHa
     protected final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
 
     /**
-     * 读取 目标服务器的消息，写给 代理服务器
+     * 读取目标服务器的消息，写给代理服务器
      */
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, DatagramPacket msg) throws Exception {

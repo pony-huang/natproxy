@@ -64,7 +64,6 @@ public class ClientTunnelTransferHandler extends BaseHandler {
         Channel targetServerChannel = proxyServerChannel.attr(AttrConstants.BIND_CHANNEL).get();
         if (targetServerChannel != null) {
             boolean writable = proxyServerChannel.isWritable();
-            LOGGER.debug("ProxyServerChannel is Writable: {}", writable);
             targetServerChannel.config().setOption(ChannelOption.AUTO_READ, writable);
         }
         super.channelWritabilityChanged(ctx);

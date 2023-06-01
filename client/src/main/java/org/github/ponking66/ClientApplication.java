@@ -58,11 +58,11 @@ public class ClientApplication implements Application {
         System.setProperty(ProxyConfig.ENV_PROPERTIES_LOG_FILE_NAME, ProxyConfig.CLIENT_FILE_LOG);
     }
 
-    public static void main(String[] args) throws InterruptedException, SSLException {
+    public static void main(String[] args) throws InterruptedException {
         new ClientApplication(ProxyConfig.getServerHost(), isTlsEnable(ProxyConfig.client().getTls()) ? ProxyConfig.client().getTls().getPort() : ProxyConfig.getServerPort()).start();
     }
 
-    public ClientApplication(String host, int port) throws SSLException {
+    public ClientApplication(String host, int port) {
         this.port = port;
         this.host = host;
 

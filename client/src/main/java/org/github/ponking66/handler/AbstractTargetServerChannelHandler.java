@@ -4,7 +4,6 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.SimpleChannelInboundHandler;
-
 import org.github.ponking66.common.AttrConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,7 +28,6 @@ public abstract class AbstractTargetServerChannelHandler<T> extends SimpleChanne
         Channel proxyServerChannel = targetServerChannel.attr(AttrConstants.BIND_CHANNEL).get();
         if (proxyServerChannel != null) {
             boolean writable = targetServerChannel.isWritable();
-            LOGGER.debug("TargetServerChannel is Writable: {}", writable);
             proxyServerChannel.config().setOption(ChannelOption.AUTO_READ, writable);
         }
         super.channelWritabilityChanged(ctx);

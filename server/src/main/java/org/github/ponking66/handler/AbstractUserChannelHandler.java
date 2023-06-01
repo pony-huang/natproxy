@@ -14,7 +14,6 @@ import org.github.ponking66.protoctl.NettyMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 import java.net.InetSocketAddress;
 
 /**
@@ -81,7 +80,6 @@ public abstract class AbstractUserChannelHandler<T> extends SimpleChannelInbound
             Channel proxyServerChannel = userChannel.attr(AttrConstants.BIND_CHANNEL).get();
             if (proxyServerChannel != null) {
                 boolean writable = userChannel.isWritable();
-                LOGGER.debug("UserChannel is Writable: {}", writable);
                 proxyServerChannel.config().setOption(ChannelOption.AUTO_READ, writable);
             }
         }

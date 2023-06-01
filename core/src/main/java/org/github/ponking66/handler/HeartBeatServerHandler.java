@@ -35,7 +35,7 @@ public class HeartBeatServerHandler extends SimpleChannelInboundHandler<NettyMes
         if (evt instanceof IdleStateEvent) {
             IdleState state = ((IdleStateEvent) evt).state();
             if (state == IdleState.READER_IDLE) {
-                LOGGER.warn("channel read timeout {}", ctx.channel());
+                LOGGER.warn("Channel read timeout {}", ctx.channel());
                 ctx.disconnect();
             }
         } else {
