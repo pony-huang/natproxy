@@ -2,7 +2,6 @@ package org.github.ponking66.handler;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.util.concurrent.ScheduledFuture;
-
 import org.github.ponking66.Application;
 import org.github.ponking66.core.ClientChannelManager;
 import org.github.ponking66.pojo.LoginResp;
@@ -11,7 +10,6 @@ import org.github.ponking66.protoctl.MessageType;
 import org.github.ponking66.protoctl.NettyMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 
 import java.util.concurrent.TimeUnit;
 
@@ -35,8 +33,11 @@ public class ClientLoginAuthHandler extends BaseHandler {
         if (message.getHeader().getStatus() != 200) {
             LoginResp resp = (LoginResp) message.getBody();
             LOGGER.info("Login failed, reason: {}", resp.getError());
-            clientApplication.stop();
             ctx.close();
+            if (heartBeat != null) {
+                heartBeat.cancel(true);
+            }
+            clientApplication.stop();
         } else {
             ClientChannelManager.setCmdChannel(ctx.channel());
             LOGGER.info("Login success!");

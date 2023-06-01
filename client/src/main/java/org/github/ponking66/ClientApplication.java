@@ -133,17 +133,23 @@ public class ClientApplication implements Application {
                 channel.writeAndFlush(message);
 
             } else {
-                LOGGER.info("Connection failure");
+                long delay = delay();
+                LOGGER.info("Connection failure, try again after {} milliseconds", delay);
                 channel.eventLoop().schedule(() -> {
-                    LOGGER.info("Try retry connection");
                     try {
                         connect();
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
-                }, delay(), TimeUnit.MILLISECONDS);
+                }, delay, TimeUnit.MILLISECONDS);
                 success = false;
                 errorTimes.incrementAndGet();
+            }
+        });
+        cf.addListener(new ChannelFutureListener() {
+            @Override
+            public void operationComplete(ChannelFuture channelFuture) throws Exception {
+                //TODO
             }
         });
         cf.channel().closeFuture().sync();
