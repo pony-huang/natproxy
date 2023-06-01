@@ -30,6 +30,8 @@ public class ProxyConfig {
 
     public static final String ENV_PROPERTIES_GLOBAL_CONFIG_FILE_NAME = "setting.yaml";
 
+
+
     public static final int READER_IDLE_TIME_SECONDS = 15;
     public static final int WRITER_IDLE_TIME_SECONDS = 0;
     public static final int ALL_IDLE_TIME_SECONDS = 0;

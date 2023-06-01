@@ -7,16 +7,21 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
+import io.netty.handler.ssl.SslContext;
+import io.netty.handler.ssl.SslContextBuilder;
+import io.netty.handler.ssl.SslHandler;
 import io.netty.handler.timeout.IdleStateHandler;
-
 import org.github.ponking66.common.ProxyConfig;
+import org.github.ponking66.common.TLSConfig;
 import org.github.ponking66.handler.*;
 import org.github.ponking66.pojo.LoginRep;
 import org.github.ponking66.protoctl.*;
+import org.github.ponking66.util.ObjectUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
+import javax.net.ssl.SSLException;
+import java.io.File;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -53,14 +58,16 @@ public class ClientApplication implements Application {
         System.setProperty(ProxyConfig.ENV_PROPERTIES_LOG_FILE_NAME, ProxyConfig.CLIENT_FILE_LOG);
     }
 
-    public static void main(String[] args) throws InterruptedException {
-        new ClientApplication(ProxyConfig.getServerHost(), ProxyConfig.getServerPort()).start();
+    public static void main(String[] args) throws InterruptedException, SSLException {
+        new ClientApplication(ProxyConfig.getServerHost(), isTlsEnable(ProxyConfig.client().getTls()) ? ProxyConfig.client().getTls().getPort() : ProxyConfig.getServerPort()).start();
     }
 
-    public ClientApplication(String host, int port) {
+    public ClientApplication(String host, int port) throws SSLException {
         this.port = port;
         this.host = host;
+
         workerGroup = new NioEventLoopGroup();
+
         proxyServerBootstrap.group(workerGroup)
                 .channel(NioSocketChannel.class)
                 .handler(new LoggingHandler(LogLevel.INFO))
@@ -68,6 +75,16 @@ public class ClientApplication implements Application {
                     @Override
                     protected void initChannel(SocketChannel ch) throws Exception {
                         ChannelPipeline pipeline = ch.pipeline();
+
+                        TLSConfig tls = ProxyConfig.server().getTls();
+                        if (isTlsEnable(tls)) {
+                            File crt = new File(tls.getKeyCertChainFile());
+                            File key = new File(tls.getKeyFile());
+                            File ca = new File(tls.getCaFile());
+                            SslContext sslContext = SslContextBuilder.forClient().keyManager(crt, key).trustManager(ca).build();
+                            pipeline.addLast(new SslHandler(sslContext.newEngine(ch.alloc())));
+                        }
+
                         pipeline.addLast(new NettyMessageDecoder());
                         pipeline.addLast(new NettyMessageEncoder());
                         pipeline.addLast(new IdleStateHandler(ProxyConfig.READER_IDLE_TIME_SECONDS, ProxyConfig.WRITER_IDLE_TIME_SECONDS, ProxyConfig.ALL_IDLE_TIME_SECONDS));
@@ -79,6 +96,13 @@ public class ClientApplication implements Application {
                         pipeline.addLast(new HeartBeatClientHandler());
                     }
                 });
+    }
+
+    private static boolean isTlsEnable(TLSConfig tls) {
+        return tls != null && tls.isEnable() &&
+                ObjectUtils.isNotEmpty(tls.getCaFile()) &&
+                ObjectUtils.isNotEmpty(tls.getKeyFile()) &&
+                ObjectUtils.isNotEmpty(tls.getKeyCertChainFile());
     }
 
     public void connect() throws InterruptedException {

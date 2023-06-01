@@ -15,4 +15,8 @@ public class ObjectUtils {
         }
         return obj == null;
     }
+
+    public static boolean isNotEmpty(Object obj) {
+        return !isEmpty(obj);
+    }
 }

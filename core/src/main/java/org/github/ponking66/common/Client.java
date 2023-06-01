@@ -13,4 +13,6 @@ public class Client {
 
     private String key;
 
+    private TLSConfig tls;
+
 }

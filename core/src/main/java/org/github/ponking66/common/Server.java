@@ -17,5 +17,6 @@ public class Server {
     private int port;
     private List<Proxy> proxy;
     private List<String> keys;
+    private TLSConfig tls;
 
 }
