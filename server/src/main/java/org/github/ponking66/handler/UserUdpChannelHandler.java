@@ -33,8 +33,8 @@ public class UserUdpChannelHandler extends AbstractUserChannelHandler<DatagramPa
     public void handleChannelRead(ChannelHandlerContext ctx, DatagramPacket msg) {
         Channel userChannel = ctx.channel();
         Channel proxyChannel = userChannel.attr(AttrConstants.BIND_CHANNEL).get();
+        // 如果没有对应的代理客户端，直接关闭连接
         if (proxyChannel == null) {
-            // 如果没有对应的代理客户端，直接关闭连接
             ctx.close();
         } else {
             int size = msg.content().readableBytes();

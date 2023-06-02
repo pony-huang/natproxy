@@ -36,8 +36,8 @@ public class UserTcpChannelHandler extends AbstractUserChannelHandler<ByteBuf> {
         Channel userChannel = ctx.channel();
         if (userChannel.isActive() && userChannel.isWritable()) {
             Channel proxyChannel = userChannel.attr(AttrConstants.BIND_CHANNEL).get();
+            // 如果没有对应的代理客户端，直接关闭连接
             if (proxyChannel == null) {
-                // 如果没有对应的代理客户端，直接关闭连接
                 ctx.close();
             } else {
                 byte[] data = new byte[msg.readableBytes()];

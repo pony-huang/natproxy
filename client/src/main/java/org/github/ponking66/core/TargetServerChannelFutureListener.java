@@ -49,18 +49,18 @@ public class TargetServerChannelFutureListener implements ChannelFutureListener 
             // 避免读缓冲区内存占用过多
             targetServerChannel.config().setOption(ChannelOption.AUTO_READ, false);
             // 建立和代理服务器的通道，同时绑定两个通道的关系
-            bind(targetServerChannel, cmdChannel, userId);
+            bind(targetServerChannel, cmdChannel);
         } else {
             cmdChannel.writeAndFlush(buildDisconnect(null));
         }
     }
 
-    public void bind(Channel targetServerChannel, Channel cmdChannel, String userId) {
+    private void bind(Channel targetServerChannel, Channel cmdChannel) {
         // 建立隧道
         proxyServerBootstrap.connect(ProxyConfig.getServerHost(), ProxyConfig.getServerPort())
                 .addListener((ChannelFutureListener) future -> {
                     // 连接成功
-                    Channel proxyServerChannel = future.channel();
+                    final Channel proxyServerChannel = future.channel();
                     if (future.isSuccess()) {
                         // 绑定成功下
                         Consumer<Channel> success = channel -> {
@@ -110,7 +110,6 @@ public class TargetServerChannelFutureListener implements ChannelFutureListener 
         message.setBody(new CloseChannelRep(userId, null));
         return message;
     }
-
 
     /**
      * 代理客户端和目标服务器建立通道后调用此方法

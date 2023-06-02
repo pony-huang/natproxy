@@ -1,11 +1,11 @@
 package org.github.ponking66.core;
 
 import io.netty.bootstrap.Bootstrap;
-import io.netty.channel.*;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelInitializer;
 import io.netty.channel.socket.nio.NioDatagramChannel;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
-
 import org.github.ponking66.handler.TargetUdpServerChannelHandler;
 import org.github.ponking66.pojo.ProxyTunnelInfoReq;
 import org.github.ponking66.protoctl.NettyMessage;
@@ -38,8 +38,7 @@ public class UdpTargetSeverListener implements TargetServerListener {
                 .handler(new ChannelInitializer<NioDatagramChannel>() {
                     @Override
                     protected void initChannel(NioDatagramChannel ch) throws Exception {
-                        ChannelPipeline pipeline = ch.pipeline();
-                        pipeline.addLast(new TargetUdpServerChannelHandler());
+                        ch.pipeline().addLast(new TargetUdpServerChannelHandler());
                     }
                 });
         this.proxyServerBootstrap = proxyServerBootstrap;
