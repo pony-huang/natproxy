@@ -11,6 +11,11 @@ server:
     - 721b2e485683bd87c32f3c208f787a626c7397a759146a93be30e15ad3193084
   proxy:
     - host: 192.168.31.96
+      intranetPort: 22
+      extranetPort: 22222
+      type: tcp
+      key: 721b2e485683bd87c32f3c208f787a626c7397a759146a93be30e15ad3193084
+    - host: 192.168.31.96
       intranetPort: 5244
       extranetPort: 5244
       type: tcp

@@ -28,6 +28,7 @@ public abstract class BaseHandler extends SimpleChannelInboundHandler<NettyMessa
         }
     }
 
+
     public abstract void handleRead(ChannelHandlerContext ctx, NettyMessage message) throws Exception;
 
     public abstract byte getMessageType();
