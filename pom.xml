@@ -11,6 +11,7 @@
         <module>core</module>
         <module>client</module>
         <module>server</module>
+        <module>distribution</module>
     </modules>
 
 

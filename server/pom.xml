@@ -22,53 +22,14 @@
             <artifactId>natproxy-core</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
+
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.13.2</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>appassembler-maven-plugin</artifactId>
-                <version>2.1.0</version>
-                <executions>
-                    <execution>
-                        <id>make-assembly</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>assemble</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <platforms>
-                        <platform>unix</platform>
-                        <platform>windows</platform>
-                    </platforms>
-                    <assembleDirectory>${user.dir}/${distribute.path}/${application.name}</assembleDirectory>
-                    <repositoryName>lib</repositoryName>
-                    <binFolder>bin</binFolder>
-                    <configurationDirectory>conf</configurationDirectory>
-                    <copyConfigurationDirectory>true</copyConfigurationDirectory>
-                    <configurationSourceDirectory>src/main/resources</configurationSourceDirectory>
-                    <includeConfigurationDirectoryInClasspath>true</includeConfigurationDirectoryInClasspath>
-                    <repositoryLayout>flat</repositoryLayout>
-                    <encoding>UTF-8</encoding>
-                    <programs>
-                        <program>
-                            <mainClass>org.github.ponking66.ServerApplication</mainClass>
-                            <id>server</id>
-                            <jvmSettings>
-                                <extraArguments>
-                                    <extraArgument>-Xms128M</extraArgument>
-                                    <extraArgument>-Xmx128M</extraArgument>
-                                    <extraArgument>-Xss256k</extraArgument>
-                                </extraArguments>
-                            </jvmSettings>
-                        </program>
-                    </programs>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
 
 </project>
