@@ -36,20 +36,20 @@ public class UserUdpChannelHandler extends AbstractUserChannelHandler<DatagramPa
         // 如果没有对应的代理客户端，直接关闭连接
         if (proxyChannel == null) {
             ctx.close();
-        } else {
-            int size = msg.content().readableBytes();
-            byte[] bytes = new byte[size];
-            msg.content().readBytes(bytes);
-            String userId = ProxyChannelManager.getUserChannelUserId(userChannel);
-            NettyMessage proxyMessage = new NettyMessage();
-            long sessionID = System.currentTimeMillis();
-            InetSocketAddress sender = msg.sender();
-            proxyMessage.setHeader(new Header().setSessionID(sessionID).setType(MessageType.TRANSFER_REQUEST));
-            TransferRep rep = new TransferRep(userId, bytes);
-            rep.setRemoteAddress(sender);
-            proxyMessage.setBody(rep);
-            proxyChannel.writeAndFlush(proxyMessage);
+            return;
         }
+        int size = msg.content().readableBytes();
+        byte[] bytes = new byte[size];
+        msg.content().readBytes(bytes);
+        String userId = ProxyChannelManager.getUserChannelUserId(userChannel);
+        NettyMessage proxyMessage = new NettyMessage();
+        long sessionID = System.currentTimeMillis();
+        InetSocketAddress sender = msg.sender();
+        proxyMessage.setHeader(new Header().setSessionID(sessionID).setType(MessageType.TRANSFER_REQUEST));
+        TransferRep rep = new TransferRep(userId, bytes);
+        rep.setRemoteAddress(sender);
+        proxyMessage.setBody(rep);
+        proxyChannel.writeAndFlush(proxyMessage);
     }
 
 }

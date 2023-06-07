@@ -15,7 +15,7 @@ import org.github.ponking66.protoctl.ProtocType;
  * @author pony
  * @date 2023/4/28
  */
-public class ClientTunnelBindHandler extends BaseHandler {
+public class ClientTunnelBindHandler extends Handler {
 
     /**
      * TCP协议相关的目标服务器相关的启动器

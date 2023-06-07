@@ -13,7 +13,7 @@ import org.github.ponking66.protoctl.NettyMessage;
  * @author pony
  * @date 2023/4/28
  */
-public class ClientDisconnectHandler extends BaseHandler {
+public class ClientDisconnectHandler extends Handler {
 
     @Override
     public void handleRead(ChannelHandlerContext ctx, NettyMessage message) {

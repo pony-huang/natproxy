@@ -7,14 +7,11 @@ import org.github.ponking66.protoctl.NettyMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
-import java.util.concurrent.TimeUnit;
-
 /**
  * @author pony
  * @date 2023/4/28
  */
-public abstract class BaseHandler extends SimpleChannelInboundHandler<NettyMessage> {
+public abstract class Handler extends SimpleChannelInboundHandler<NettyMessage> {
 
     protected final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
 

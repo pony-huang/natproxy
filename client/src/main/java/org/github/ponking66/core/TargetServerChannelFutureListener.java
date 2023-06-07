@@ -24,13 +24,8 @@ import java.util.function.Consumer;
 public class TargetServerChannelFutureListener implements ChannelFutureListener {
 
     protected final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
-
     private final Channel cmdChannel;
     private final String userId;
-
-    /**
-     * 代理服务器的启动器
-     */
     protected final Bootstrap proxyServerBootstrap;
 
     public TargetServerChannelFutureListener(Channel cmdChannel, String userId, Bootstrap proxyServerBootstrap) {
@@ -62,26 +57,10 @@ public class TargetServerChannelFutureListener implements ChannelFutureListener 
                     // 连接成功
                     final Channel proxyServerChannel = future.channel();
                     if (future.isSuccess()) {
-                        // 绑定成功下
-                        Consumer<Channel> success = channel -> {
-                            LOGGER.info("The proxy server is successfully connected, channel: {}", channel);
-                            // 两个通道绑定关系
-                            proxyServerChannel.attr(AttrConstants.BIND_CHANNEL).set(targetServerChannel);
-                            targetServerChannel.attr(AttrConstants.BIND_CHANNEL).set(proxyServerChannel);
-                            // 通知代理服务器,代理隧道已经打通
-                            proxyServerChannel.writeAndFlush(buildConnectResponse(userId));
-                            // 重新注册和目标服务器通道的读事件,可以进行数据代理传输
-                            targetServerChannel.config().setOption(ChannelOption.AUTO_READ, true);
-                            // 建立绑定关系，唯一标示缓存通道
-                            ClientChannelManager.addTargetServerChannel(userId, targetServerChannel);
-                            // 建立绑定关系，唯一标示缓存通道
-                            ClientChannelManager.setTargetServerChannelUserId(targetServerChannel, userId);
-                        };
-                        Consumer<Channel> failed = channel -> {
-                            cmdChannel.writeAndFlush(buildDisconnect(userId));
-                        };
-                        // 绑定失败下
-                        borrowProxyChanel(proxyServerBootstrap, success, failed);
+                        // 绑定
+                        borrowProxyChanel(proxyServerBootstrap,
+                                bindTargetChannelAndProxyChannel(targetServerChannel, proxyServerChannel),
+                                connectFailed(cmdChannel));
                     } else {
                         LOGGER.warn("Failed to connect proxy server, cause: ", future.cause());
                         // 通知代理服务器关闭此代理服务（关闭端口监听）
@@ -90,6 +69,29 @@ public class TargetServerChannelFutureListener implements ChannelFutureListener 
                         cmdChannel.writeAndFlush(nettyMessage);
                     }
                 });
+    }
+
+    private Consumer<Channel> connectFailed(Channel cmdChannel) {
+        return channel -> {
+            cmdChannel.writeAndFlush(buildDisconnect(userId));
+        };
+    }
+
+    private Consumer<Channel> bindTargetChannelAndProxyChannel(Channel targetServerChannel, Channel proxyServerChannel) {
+        return channel -> {
+            LOGGER.info("The proxy server is successfully connected, channel: {}", channel);
+            // 两个通道绑定关系
+            proxyServerChannel.attr(AttrConstants.BIND_CHANNEL).set(targetServerChannel);
+            targetServerChannel.attr(AttrConstants.BIND_CHANNEL).set(proxyServerChannel);
+            // 通知代理服务器,代理隧道已经打通
+            proxyServerChannel.writeAndFlush(buildConnectResponse(userId));
+            // 重新注册和目标服务器通道的读事件,可以进行数据代理传输
+            targetServerChannel.config().setOption(ChannelOption.AUTO_READ, true);
+            // 建立绑定关系，唯一标示缓存通道
+            ClientChannelManager.addTargetServerChannel(userId, targetServerChannel);
+            // 建立绑定关系，唯一标示缓存通道
+            ClientChannelManager.setTargetServerChannelUserId(targetServerChannel, userId);
+        };
     }
 
     private NettyMessage buildConnectResponse(String userId) {
@@ -125,8 +127,8 @@ public class TargetServerChannelFutureListener implements ChannelFutureListener 
         Channel channel = ClientChannelManager.poolChannel();
         // 如果有可用的channel
         if (channel != null) {
-            // 绑定 隧道映射关系
-            // 目标服务器<--->代理客户端；代理客户端<--->代理服务器
+            // 绑定隧道映射关系
+            // 目标服务器 <---> 代理客户端；代理客户端 <---> 代理服务器
             successListener.accept(channel);
         } else {
             // 建立隧道

@@ -4,7 +4,7 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import org.github.ponking66.common.ProxyConfig;
 import org.github.ponking66.core.ProxyChannelManager;
-import org.github.ponking66.core.UsersApplication;
+import org.github.ponking66.core.UserApplication;
 import org.github.ponking66.pojo.LoginRep;
 import org.github.ponking66.pojo.LoginResp;
 import org.github.ponking66.protoctl.Header;
@@ -19,12 +19,12 @@ import java.util.List;
  * @author pony
  * @date 2023/4/28
  */
-public class ServerLoginAuthHandler extends BaseHandler {
+public class ServerLoginAuthHandler extends Handler {
 
-    private final List<UsersApplication> usersApplications;
+    private final List<UserApplication> userApplications;
 
-    public ServerLoginAuthHandler(List<UsersApplication> usersApplications) {
-        this.usersApplications = usersApplications;
+    public ServerLoginAuthHandler(List<UserApplication> userApplications) {
+        this.userApplications = userApplications;
     }
 
     @Override
@@ -68,8 +68,8 @@ public class ServerLoginAuthHandler extends BaseHandler {
                 ProxyChannelManager.addCmdChannel(ports, clientKey, cmdChannel);
                 try {
                     // 开启用户端口监听
-                    for (UsersApplication usersApplication : usersApplications) {
-                        usersApplication.start(clientKey);
+                    for (UserApplication userApplication : userApplications) {
+                        userApplication.start(clientKey);
                     }
                     ctx.writeAndFlush(buildResponse(null, Header.Status.SUCCESS));
                 } catch (Exception e) {

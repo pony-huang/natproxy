@@ -19,7 +19,7 @@ import java.net.InetSocketAddress;
  * @author pony
  * @date 2023/5/18
  */
-public class ServerTunnelTransferHandler extends BaseHandler {
+public class ServerTunnelTransferHandler extends Handler {
 
     @Override
     public void handleRead(ChannelHandlerContext ctx, NettyMessage message) {

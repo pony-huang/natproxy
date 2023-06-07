@@ -15,7 +15,7 @@ import org.github.ponking66.core.ProxyChannelManager;
  * @author pony
  * @date 2023/4/28
  */
-public class ServerTunnelConnectHandler extends BaseHandler {
+public class ServerTunnelConnectHandler extends Handler {
 
     @Override
     public void handleRead(ChannelHandlerContext ctx, NettyMessage msg) {

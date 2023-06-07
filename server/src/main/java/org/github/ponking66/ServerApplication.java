@@ -14,7 +14,7 @@ import io.netty.handler.ssl.SslHandler;
 import io.netty.handler.timeout.IdleStateHandler;
 import org.github.ponking66.common.ProxyConfig;
 import org.github.ponking66.common.TLSConfig;
-import org.github.ponking66.core.UsersApplication;
+import org.github.ponking66.core.UserApplication;
 import org.github.ponking66.core.UsersTcpBootstrapApplication;
 import org.github.ponking66.core.UsersUdpBootstrapApplication;
 import org.github.ponking66.handler.*;
@@ -26,7 +26,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -47,14 +46,14 @@ public class ServerApplication implements Application {
     private final EventLoopGroup bossGroup = new NioEventLoopGroup();
     private final EventLoopGroup workerGroup = new NioEventLoopGroup();
 
-    private final List<UsersApplication> usersApplications;
+    private final List<UserApplication> userApplications;
 
     public static void main(String[] args) throws Exception {
         new ServerApplication().start();
     }
 
     public ServerApplication() {
-        usersApplications = Arrays.asList(new UsersTcpBootstrapApplication(bossGroup, workerGroup), new UsersUdpBootstrapApplication(workerGroup));
+        userApplications = Arrays.asList(new UsersTcpBootstrapApplication(bossGroup, workerGroup), new UsersUdpBootstrapApplication(workerGroup));
     }
 
     @Override
@@ -112,7 +111,7 @@ public class ServerApplication implements Application {
         pipeline.addLast(new NettyMessageDecoder());
         pipeline.addLast(new NettyMessageEncoder());
         pipeline.addLast(new IdleStateHandler(ProxyConfig.READER_IDLE_TIME_SECONDS, ProxyConfig.WRITER_IDLE_TIME_SECONDS, ProxyConfig.ALL_IDLE_TIME_SECONDS));
-        pipeline.addLast(new ServerLoginAuthHandler(usersApplications));
+        pipeline.addLast(new ServerLoginAuthHandler(userApplications));
         pipeline.addLast(new ServerDisconnectHandler());
         pipeline.addLast(new ServerTunnelConnectHandler());
         pipeline.addLast(new ServerTunnelTransferHandler());

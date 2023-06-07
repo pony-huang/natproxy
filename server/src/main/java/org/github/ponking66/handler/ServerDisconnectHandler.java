@@ -14,7 +14,7 @@ import org.github.ponking66.protoctl.NettyMessage;
  * @author pony
  * @date 2023/4/28
  */
-public class ServerDisconnectHandler extends BaseHandler {
+public class ServerDisconnectHandler extends Handler {
 
     /**
      * 处理代理客户端的断开连接请求

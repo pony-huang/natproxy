@@ -39,16 +39,16 @@ public class UserTcpChannelHandler extends AbstractUserChannelHandler<ByteBuf> {
             // 如果没有对应的代理客户端，直接关闭连接
             if (proxyChannel == null) {
                 ctx.close();
-            } else {
-                byte[] data = new byte[msg.readableBytes()];
-                msg.readBytes(data);
-                String userId = ProxyChannelManager.getUserChannelUserId(userChannel);
-                NettyMessage proxyMessage = new NettyMessage();
-                proxyMessage.setHeader(new Header().setType(MessageType.TRANSFER_REQUEST));
-                TransferRep rep = new TransferRep(userId, data);
-                proxyMessage.setBody(rep);
-                proxyChannel.writeAndFlush(proxyMessage);
+                return;
             }
+            byte[] data = new byte[msg.readableBytes()];
+            msg.readBytes(data);
+            String userId = ProxyChannelManager.getUserChannelUserId(userChannel);
+            NettyMessage proxyMessage = new NettyMessage();
+            proxyMessage.setHeader(new Header().setType(MessageType.TRANSFER_REQUEST));
+            TransferRep rep = new TransferRep(userId, data);
+            proxyMessage.setBody(rep);
+            proxyChannel.writeAndFlush(proxyMessage);
         } else {
             LOGGER.error("Message dropped.");
         }

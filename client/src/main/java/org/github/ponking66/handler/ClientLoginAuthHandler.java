@@ -17,7 +17,7 @@ import java.util.concurrent.TimeUnit;
  * @author pony
  * @date 2023/5/18
  */
-public class ClientLoginAuthHandler extends BaseHandler {
+public class ClientLoginAuthHandler extends Handler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClientLoginAuthHandler.class);
     private volatile ScheduledFuture<?> heartBeat;

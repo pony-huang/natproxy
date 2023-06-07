@@ -13,7 +13,7 @@ import java.util.List;
  * @author pony
  * @date 2023/5/23
  */
-public abstract class UsersApplication {
+public abstract class UserApplication {
 
     protected final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
 

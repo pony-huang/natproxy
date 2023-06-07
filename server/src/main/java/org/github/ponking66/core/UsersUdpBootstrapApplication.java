@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
  * @author pony
  * @date 2023/5/23
  */
-public class UsersUdpBootstrapApplication extends UsersApplication {
+public class UsersUdpBootstrapApplication extends UserApplication {
 
     protected final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
 
@@ -35,7 +35,6 @@ public class UsersUdpBootstrapApplication extends UsersApplication {
                 .handler(new ChannelInitializer<NioDatagramChannel>() {
                     @Override
                     public void initChannel(NioDatagramChannel ch) throws Exception {
-                        // 转发用户请求
                         ch.pipeline().addLast(new UserUdpChannelHandler());
                     }
                 });

@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
  * @author pony
  * @date 2023/5/23
  */
-public class UsersTcpBootstrapApplication extends UsersApplication {
+public class UsersTcpBootstrapApplication extends UserApplication {
 
     protected static final Logger LOGGER = LoggerFactory.getLogger(UsersTcpBootstrapApplication.class);
     private final ServerBootstrap serverBootstrap;
@@ -32,7 +32,6 @@ public class UsersTcpBootstrapApplication extends UsersApplication {
                 .childHandler(new ChannelInitializer<SocketChannel>() {
                     @Override
                     public void initChannel(SocketChannel ch) throws Exception {
-                        // 转发用户请求
                         ch.pipeline().addLast(new UserTcpChannelHandler());
                     }
                 });
