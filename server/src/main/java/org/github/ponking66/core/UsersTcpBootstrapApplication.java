@@ -5,12 +5,10 @@ import io.netty.channel.*;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import org.github.ponking66.common.Proxy;
-import org.github.ponking66.common.ProxyConfig;
 import org.github.ponking66.handler.UserTcpChannelHandler;
 import org.github.ponking66.protoctl.ProtocType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -44,7 +42,7 @@ public class UsersTcpBootstrapApplication extends UserApplication {
 
     @Override
     protected List<Integer> extranetPort(String clientKey) {
-        return ProxyConfig.server().getProxy().stream().filter(item -> ProtocType.TCP.equals(item.getType())).map(Proxy::getExtranetPort).collect(Collectors.toList());
+        return ProxyChannelManagerFactory.getProxyChannelManager().proxies(clientKey).stream().filter(item -> ProtocType.TCP.equals(item.getType())).map(Proxy::getExtranetPort).collect(Collectors.toList());
     }
 
 }

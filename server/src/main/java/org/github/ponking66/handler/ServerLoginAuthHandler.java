@@ -2,8 +2,8 @@ package org.github.ponking66.handler;
 
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
-import org.github.ponking66.common.ProxyConfig;
 import org.github.ponking66.core.ProxyChannelManager;
+import org.github.ponking66.core.ProxyChannelManagerFactory;
 import org.github.ponking66.core.UserApplication;
 import org.github.ponking66.pojo.LoginRep;
 import org.github.ponking66.pojo.LoginResp;
@@ -31,7 +31,7 @@ public class ServerLoginAuthHandler extends Handler {
     public void handleRead(ChannelHandlerContext ctx, NettyMessage message) {
         if (message.getBody() instanceof LoginRep rep) {
             String clientKey = rep.getClientKey();
-            if (!ProxyConfig.server().getKeys().contains(clientKey)) {
+            if (!ProxyChannelManagerFactory.getProxyChannelManager().containsKey(clientKey)) {
                 LOGGER.info("Authentication failure");
                 ctx.writeAndFlush(buildResponse(LoginResp.RespError.CLIENT_KEY_ERROR, Header.Status.FAILED));
                 ctx.close();
@@ -47,7 +47,7 @@ public class ServerLoginAuthHandler extends Handler {
 
     private void bindProxySeverChannel(ChannelHandlerContext ctx, String clientKey) {
         // 获取该客户端下的映射端口
-        List<Integer> ports = ProxyConfig.getClientKeyExtranetPort(clientKey);
+        List<Integer> ports = ProxyChannelManagerFactory.getProxyChannelManager().extranetPortByClientKey(clientKey);
         // 授权失败，客户端秘钥错误
         if (ports.isEmpty()) {
             LOGGER.warn("Error clientKey: {}", clientKey);

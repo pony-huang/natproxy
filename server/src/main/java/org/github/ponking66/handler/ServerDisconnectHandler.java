@@ -10,6 +10,8 @@ import org.github.ponking66.pojo.CloseChannelRep;
 import org.github.ponking66.protoctl.MessageType;
 import org.github.ponking66.protoctl.NettyMessage;
 
+import java.util.Optional;
+
 /**
  * @author pony
  * @date 2023/4/28
@@ -21,17 +23,20 @@ public class ServerDisconnectHandler extends Handler {
      */
     @Override
     public void handleRead(ChannelHandlerContext ctx, NettyMessage msg) {
-        String clientKey = ctx.channel().attr(AttrConstants.CLIENT_KEY).get();
+        Channel currentChannel = ctx.channel();
+        String clientKey = currentChannel.attr(AttrConstants.CLIENT_KEY).get();
         // 代理连接没有连上服务器，由cmdChannel通知用户断开连接
         if (clientKey == null) {
             LOGGER.warn("ClientKey is null");
             if (msg.getBody() instanceof CloseChannelRep rep) {
                 String userId = rep.getUserId();
-                Channel userChannel = ProxyChannelManager.removeUserChannelFromCmdChannel(ctx.channel(), userId);
-                if (userChannel != null) {
-                    // 数据发送完成后，关闭连接
-                    userChannel.writeAndFlush(Unpooled.EMPTY_BUFFER).addListener(ChannelFutureListener.CLOSE);
-                }
+                Optional.of(rep.getUserId()).ifPresent(data -> {
+                    Channel userChannel = ProxyChannelManager.removeUserChannelFromCmdChannel(currentChannel, userId);
+                    if (userChannel != null) {
+                        // 数据发送完成后，关闭连接
+                        userChannel.writeAndFlush(Unpooled.EMPTY_BUFFER).addListener(ChannelFutureListener.CLOSE);
+                    }
+                });
                 return;
             }
         }
@@ -45,12 +50,12 @@ public class ServerDisconnectHandler extends Handler {
         }
 
         // 如果代理客户端关闭或者目标服务器关闭，通知用户连接断开
-        Channel userChannel = ProxyChannelManager.removeUserChannelFromCmdChannel(cmdChannel, ctx.channel().attr(AttrConstants.USER_ID).get());
+        Channel userChannel = ProxyChannelManager.removeUserChannelFromCmdChannel(cmdChannel, currentChannel.attr(AttrConstants.USER_ID).get());
         if (userChannel != null) {
             // 解除绑定的关系
-            ctx.channel().attr(AttrConstants.BIND_CHANNEL).set(null);
-            ctx.channel().attr(AttrConstants.CLIENT_KEY).set(null);
-            ctx.channel().attr(AttrConstants.USER_ID).set(null);
+            currentChannel.attr(AttrConstants.BIND_CHANNEL).set(null);
+            currentChannel.attr(AttrConstants.CLIENT_KEY).set(null);
+            currentChannel.attr(AttrConstants.USER_ID).set(null);
             // 数据发送完成后, 关闭连接
             userChannel.writeAndFlush(Unpooled.EMPTY_BUFFER).addListener(ChannelFutureListener.CLOSE);
         }

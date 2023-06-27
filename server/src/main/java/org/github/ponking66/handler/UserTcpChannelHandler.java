@@ -14,7 +14,6 @@ import org.github.ponking66.protoctl.NettyMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 import java.net.InetSocketAddress;
 
 /**
@@ -72,10 +71,7 @@ public class UserTcpChannelHandler extends AbstractUserChannelHandler<ByteBuf> {
             Channel proxyChannel = userChannel.attr(AttrConstants.BIND_CHANNEL).get();
             if (proxyChannel != null && proxyChannel.isActive()) {
                 // 清理绑定关系
-                proxyChannel.attr(AttrConstants.BIND_CHANNEL).set(null);
-                proxyChannel.attr(AttrConstants.CLIENT_KEY).set(null);
-                proxyChannel.attr(AttrConstants.USER_ID).set(null);
-
+                ProxyChannelManager.unbind(proxyChannel);
                 // 设置可读
                 proxyChannel.config().setOption(ChannelOption.AUTO_READ, true);
                 // 通知客户端，用户连接已经断开
@@ -83,11 +79,9 @@ public class UserTcpChannelHandler extends AbstractUserChannelHandler<ByteBuf> {
                 message.setHeader(new Header().setType(MessageType.DISCONNECT));
                 CloseChannelRep rep = new CloseChannelRep(userId, null);
                 message.setBody(rep);
-
                 proxyChannel.writeAndFlush(message);
             }
         }
         super.channelInactive(ctx);
     }
-
 }

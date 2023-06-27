@@ -76,7 +76,7 @@ public class ClientApplication implements Application {
                     protected void initChannel(SocketChannel ch) throws Exception {
                         ChannelPipeline pipeline = ch.pipeline();
 
-                        TLSConfig tls = ProxyConfig.server().getTls();
+                        TLSConfig tls = ProxyConfig.client().getTls();
                         if (isTlsEnable(tls)) {
                             File crt = new File(tls.getKeyCertChainFile());
                             File key = new File(tls.getKeyFile());

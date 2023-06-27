@@ -47,7 +47,7 @@ public class UsersUdpBootstrapApplication extends UserApplication {
 
     @Override
     protected List<Integer> extranetPort(String clientKey) {
-        return ProxyConfig.server().getProxy().stream().filter(item -> ProtocType.UDP.equals(item.getType())).map(Proxy::getExtranetPort).collect(Collectors.toList());
+        return ProxyChannelManagerFactory.getProxyChannelManager().proxies(clientKey).stream().filter(item -> ProtocType.UDP.equals(item.getType())).map(Proxy::getExtranetPort).collect(Collectors.toList());
     }
 
 }

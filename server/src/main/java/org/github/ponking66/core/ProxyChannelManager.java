@@ -8,7 +8,6 @@ import org.github.ponking66.pojo.ProxyTunnelInfoReq;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 import java.net.InetSocketAddress;
 import java.util.List;
 import java.util.Map;
@@ -28,7 +27,6 @@ public class ProxyChannelManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ProxyChannelManager.class);
 
-
     /**
      * 用户唯一标识 生成器
      */
@@ -42,9 +40,9 @@ public class ProxyChannelManager {
     public static final AttributeKey<Map<String, Channel>> USER_CHANNELS = AttributeKey.newInstance("user_channels");
 
     /**
-     * 真实端服务器ip和端口信息，ip:port
+     * 目标服务器ip和端口信息，ip:port
      */
-    public static final AttributeKey<ProxyTunnelInfoReq> REQUEST_LAN_INFO = AttributeKey.newInstance("request_lan_info");
+    public static final AttributeKey<ProxyTunnelInfoReq> TARGET_SERVER_INFO = AttributeKey.newInstance("target_server_info");
 
     /**
      * cmdChannel 对应的端口列表
@@ -67,7 +65,7 @@ public class ProxyChannelManager {
     /**
      * 每个代理服务器开放的端口，都映射一个 bindChannel
      */
-    private static final Map<Integer, Channel> portBindChannelMapping = new ConcurrentHashMap<>();
+    private static final Map<Integer, Channel> PORT_BIND_CHANNEL_MAPPING = new ConcurrentHashMap<>();
 
     /**
      * 每个代理客户端的 唯一标示（clientKey），都映射一个 cmdChannel
@@ -116,7 +114,7 @@ public class ProxyChannelManager {
         ProxyTunnelInfoReq proxyTunnelInfoReq = ProxyConfig.getProxyInfo(sa.getPort());
         // 绑定关系
         userChannel.attr(AttrConstants.USER_ID).set(userId);
-        userChannel.attr(REQUEST_LAN_INFO).set(proxyTunnelInfoReq);
+        userChannel.attr(TARGET_SERVER_INFO).set(proxyTunnelInfoReq);
         cmdChannel.attr(USER_CHANNELS).get().put(userId, userChannel);
     }
 
@@ -148,15 +146,15 @@ public class ProxyChannelManager {
      * @return bindChannel
      */
     public static Channel getBindChannel(Integer port) {
-        return portBindChannelMapping.get(port);
+        return PORT_BIND_CHANNEL_MAPPING.get(port);
     }
 
     public static void addBindChannel(Integer port, Channel bindChannel) {
-        portBindChannelMapping.put(port, bindChannel);
+        PORT_BIND_CHANNEL_MAPPING.put(port, bindChannel);
     }
 
     public static Channel removeBindChannel(Integer port) {
-        return portBindChannelMapping.remove(port);
+        return PORT_BIND_CHANNEL_MAPPING.remove(port);
     }
 
     /**
@@ -170,10 +168,9 @@ public class ProxyChannelManager {
         if (cmdChannel.attr(USER_CHANNELS).get() == null) {
             return null;
         }
-
-        // ConcurrentHashMap 只保证单个操作的原子性
         synchronized (cmdChannel) {
-            return cmdChannel.attr(USER_CHANNELS).get().remove(userId);
+            Map<String, Channel> channelMap = cmdChannel.attr(USER_CHANNELS).get();
+            return channelMap.remove(userId);
         }
     }
 
@@ -267,5 +264,30 @@ public class ProxyChannelManager {
         return cmdChannel.attr(USER_CHANNELS).get();
     }
 
+    /**
+     * 清理绑定关系
+     *
+     * @param proxyChannel 代理channel
+     */
+    public static void unbind(Channel proxyChannel) {
+        proxyChannel.attr(AttrConstants.BIND_CHANNEL).set(null);
+        proxyChannel.attr(AttrConstants.CLIENT_KEY).set(null);
+        proxyChannel.attr(AttrConstants.USER_ID).set(null);
+    }
+
+    /**
+     * 绑定proxyChannel和userChannel的关系
+     *
+     * @param token        client_key
+     * @param userId       userId
+     * @param userChannel  用户channel
+     * @param proxyChannel 代理客户端channel
+     */
+    public static void bind(String token, String userId, Channel userChannel, Channel proxyChannel) {
+        proxyChannel.attr(AttrConstants.USER_ID).set(userId);
+        proxyChannel.attr(AttrConstants.CLIENT_KEY).set(token);
+        proxyChannel.attr(AttrConstants.BIND_CHANNEL).set(userChannel);
+        userChannel.attr(AttrConstants.BIND_CHANNEL).set(proxyChannel);
+    }
 
 }

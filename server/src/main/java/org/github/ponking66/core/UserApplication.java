@@ -5,9 +5,9 @@ import io.netty.channel.ChannelFuture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 import java.net.BindException;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 /**
  * @author pony
@@ -38,11 +38,7 @@ public abstract class UserApplication {
         List<Integer> ports = extranetPort(clientKey);
         for (int port : ports) {
             try {
-                ChannelFuture future = bind(port);
-                future.get();
-                Channel bindChannel = future.channel();
-                // 缓存 port:bindChannel
-                ProxyChannelManager.addBindChannel(port, bindChannel);
+                start(port);
                 LOGGER.info("Bind user port {}, clientKey {}", port, clientKey);
             } catch (Exception ex) {
                 // 该端口已经绑定过，直接忽略
@@ -52,5 +48,27 @@ public abstract class UserApplication {
                 }
             }
         }
+    }
+
+    /**
+     * 开启映射的端口，用于处理用户的请求
+     */
+    public final void start(int port) throws ExecutionException, InterruptedException {
+        ChannelFuture future = bind(port);
+        future.get();
+        Channel userChannel = future.channel();
+        // 缓存 port:userChannel
+        ProxyChannelManager.addBindChannel(port, userChannel);
+    }
+
+
+    /**
+     * 重启ClientKey客户端映射的端口，用于处理用户的请求
+     *
+     * @param clientKey 代理客户端的key
+     */
+    public final void restart(String clientKey) {
+        // 根据clientKey开启 代理指定代理客户端映射的端口
+        start(clientKey);
     }
 }

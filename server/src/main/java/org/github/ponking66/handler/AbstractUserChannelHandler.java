@@ -23,6 +23,7 @@ import java.net.InetSocketAddress;
 public abstract class AbstractUserChannelHandler<T> extends SimpleChannelInboundHandler<T> {
 
     private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
+
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, T msg) throws Exception {
         handleChannelRead(ctx, msg);
@@ -31,8 +32,7 @@ public abstract class AbstractUserChannelHandler<T> extends SimpleChannelInbound
     public abstract void handleChannelRead(ChannelHandlerContext ctx, T msg) throws Exception;
 
     /**
-     * 建立用户和代理服务器的channel后，通知代理客户端，建立和代理服务器的channel，
-     * 为两个 channel 绑定关系
+     * 建立用户和代理服务器的channel关系后，通知代理客户端建立和代理服务器的channel，
      */
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
@@ -62,7 +62,6 @@ public abstract class AbstractUserChannelHandler<T> extends SimpleChannelInbound
         }
         super.channelActive(ctx);
     }
-
 
     /**
      * 平衡用户channel和代理客户端channel的读写速度，防止OOM
