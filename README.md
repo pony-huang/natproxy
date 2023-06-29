@@ -39,7 +39,7 @@ Natproxy是一个内网穿透工具，可以使个人计算机或局域网上的
             extranetPort: 22222 # 代理服务器暴露端口（用户访问端口）
             type: tcp # 代理转发协议
             key: 721b2e485683bd87c32f3c208f787a626c7397a759146a93be30e15ad3193084 # 指定开启代理客户端
-          - host: 127.0.0.1
+          - host: 192.168.31.96
             intranetPort: 3306
             extranetPort: 3306
             type: tcp
