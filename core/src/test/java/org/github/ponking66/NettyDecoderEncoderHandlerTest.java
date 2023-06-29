@@ -24,14 +24,7 @@ public class NettyDecoderEncoderHandlerTest {
                 .setSessionID(System.currentTimeMillis())
                 .setMagic(0xabcdf123)
                 .setVersion((byte) 2)
-                .setType(MessageType.LOGIN_RESPONSE).setVersion((byte) 1).setExtended(new HashMap<>() {
-                    {
-                        this.put("h1", "h1");
-                        this.put("h2", "h2");
-                        this.put("h3", "h3");
-                        this.put("h4", "h4");
-                    }
-                }));
+                .setType(MessageType.LOGIN_RESPONSE).setVersion((byte) 1));
         msg1.setBody("Good morning sir!");
 
         Assert.assertTrue(channel.writeOutbound(msg1));

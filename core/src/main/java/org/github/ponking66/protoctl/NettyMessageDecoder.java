@@ -3,17 +3,9 @@ package org.github.ponking66.protoctl;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
-
-import org.jboss.marshalling.ByteInput;
-import org.jboss.marshalling.Unmarshaller;
+import org.github.ponking66.util.MarshallerUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * @author pony
@@ -21,18 +13,7 @@ import java.util.Map;
  */
 public class NettyMessageDecoder extends LengthFieldBasedFrameDecoder {
 
-
-    private final Unmarshaller unmarshaller;
-
     private final Logger LOGGER = LoggerFactory.getLogger(NettyMessageDecoder.class);
-
-    {
-        try {
-            this.unmarshaller = MarshallingCodecFactory.buildUnMarshalling();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
 
     public NettyMessageDecoder() {
         this(1024 * 1024 * 4, 4, 4, -8, 0);
@@ -48,7 +29,7 @@ public class NettyMessageDecoder extends LengthFieldBasedFrameDecoder {
         if (frame == null) {
             return null;
         }
-        NettyMessage nettyMessage = new NettyMessage();
+        NettyMessage msg = new NettyMessage();
         Header header = new Header();
         header.setMagic(frame.readInt());
         header.setLength(frame.readInt());
@@ -57,47 +38,22 @@ public class NettyMessageDecoder extends LengthFieldBasedFrameDecoder {
         header.setVersion(frame.readByte());
         header.setStatus(frame.readInt());
 
-        int size = frame.readInt();
-        if (size > 0) {
-            Map<String, Object> attach = new HashMap<>(size);
-            int keySize;
-            byte[] keyArray;
-            for (int i = 0; i < size; i++) {
-                keySize = frame.readInt();
-                keyArray = new byte[keySize];
-                frame.readBytes(keyArray);
-                attach.put(new String(keyArray, StandardCharsets.UTF_8), decodeObject(frame));
-            }
-            header.setExtended(attach);
-        }
         if (frame.readableBytes() > 4) {
-            nettyMessage.setBody(decodeObject(frame));
+            int objectSize = frame.readInt();
+            ByteBuf buf = frame.slice(frame.readerIndex(), objectSize);
+            msg.setBody(MarshallerUtils.readObject(buf));
+            frame.readerIndex(frame.readerIndex() + objectSize);
         }
-        nettyMessage.setHeader(header);
-        LOGGER.info("Receive Message, type: {}, sessionID: {}", header.getType(), header.getSessionID());
-        // 防止内存泄露
-        frame.release();
-        return nettyMessage;
-    }
 
-    public Object decodeObject(ByteBuf in) throws Exception {
-        int objectSize = in.readInt();
-        ByteBuf buf = in.slice(in.readerIndex(), objectSize);
-        ByteInput input = new ChannelBufferByteInput(buf);
-        try {
-            unmarshaller.start(input);
-            Object obj = unmarshaller.readObject();
-            unmarshaller.finish();
-            in.readerIndex(in.readerIndex() + objectSize);
-            return obj;
-        } finally {
-            unmarshaller.close();
-        }
+        msg.setHeader(header);
+        LOGGER.info("Receive Message, type: {}", header.getType());
+        // frame.release() 释放存储，防止内存泄露
+        frame.release();
+        return msg;
     }
 
     @Override
     public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
-//        ctx.flush();
         super.channelReadComplete(ctx);
     }
 }

@@ -4,9 +4,6 @@ import lombok.Data;
 import lombok.ToString;
 import lombok.experimental.Accessors;
 
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  * @author pony
  * @date 2023/4/27
@@ -17,9 +14,9 @@ import java.util.Map;
 public class Header {
 
     /**
-     * 魔数
+     * 魔数 (暂时用不上)
      */
-    private int magic = 0xabef9876;
+    private int magic = 0xbb9527;
 
     /**
      * 消息长度
@@ -27,7 +24,7 @@ public class Header {
     private int length;
 
     /**
-     * 会话ID
+     * 会话 ID (暂时用不上)
      */
     private long sessionID;
 
@@ -37,7 +34,7 @@ public class Header {
     private byte type;
 
     /**
-     * 版本号
+     * 版本号 (暂时用不上)
      */
     private byte version = 0x01;
 
@@ -45,11 +42,6 @@ public class Header {
      * 状态
      */
     private int status = Status.SUCCESS.getVal();
-
-    /**
-     * 扩展字段
-     */
-    private Map<String, Object> extended = new HashMap<String, Object>();
 
     public enum Status {
         SUCCESS(200),
