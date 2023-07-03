@@ -14,13 +14,14 @@ import io.netty.handler.timeout.IdleStateHandler;
 import org.github.ponking66.common.ProxyConfig;
 import org.github.ponking66.common.TLSConfig;
 import org.github.ponking66.handler.*;
-import org.github.ponking66.pojo.LoginRep;
-import org.github.ponking66.protoctl.*;
+import org.github.ponking66.protoctl.NettyMessage;
+import org.github.ponking66.protoctl.NettyMessageDecoder;
+import org.github.ponking66.protoctl.NettyMessageEncoder;
 import org.github.ponking66.util.ObjectUtils;
+import org.github.ponking66.util.RequestResponseUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.net.ssl.SSLException;
 import java.io.File;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -127,9 +128,7 @@ public class ClientApplication implements Application {
                 success = true;
                 errorTimes.set(0);
                 // Login
-                NettyMessage message = new NettyMessage();
-                message.setHeader(new Header().setType(MessageType.LOGIN_REQUEST));
-                message.setBody(new LoginRep(ProxyConfig.client().getKey()));
+                NettyMessage message = RequestResponseUtils.loginRep(ProxyConfig.client().getKey());
                 channel.writeAndFlush(message);
 
             } else {
@@ -154,6 +153,7 @@ public class ClientApplication implements Application {
         });
         cf.channel().closeFuture().sync();
     }
+
 
     private long delay() {
         // 多次连接失败，重试连接默认延迟3秒执行

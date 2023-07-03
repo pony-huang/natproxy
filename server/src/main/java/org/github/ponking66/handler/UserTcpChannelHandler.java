@@ -7,21 +7,17 @@ import io.netty.channel.ChannelOption;
 import org.github.ponking66.common.AttrConstants;
 import org.github.ponking66.core.ProxyChannelManager;
 import org.github.ponking66.pojo.CloseChannelRep;
-import org.github.ponking66.pojo.TransferRep;
 import org.github.ponking66.protoctl.Header;
 import org.github.ponking66.protoctl.MessageType;
 import org.github.ponking66.protoctl.NettyMessage;
+import org.github.ponking66.util.RequestResponseUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
 
 /**
- * 处理用户的请求
- * <p>
- * 1.处理用户的连接请求
- * 2.转发用户的请求
- * </p>
+ * 处理用户的连接请求,转发用户的请求
  *
  * @author pony
  * @date 2023/5/23
@@ -43,15 +39,12 @@ public class UserTcpChannelHandler extends AbstractUserChannelHandler<ByteBuf> {
             byte[] data = new byte[msg.readableBytes()];
             msg.readBytes(data);
             String userId = ProxyChannelManager.getUserChannelUserId(userChannel);
-            NettyMessage proxyMessage = new NettyMessage();
-            proxyMessage.setHeader(new Header().setType(MessageType.TRANSFER_REQUEST));
-            TransferRep rep = new TransferRep(userId, data);
-            proxyMessage.setBody(rep);
-            proxyChannel.writeAndFlush(proxyMessage);
+            proxyChannel.writeAndFlush(RequestResponseUtils.transferRep(data, userId));
         } else {
             LOGGER.error("Message dropped.");
         }
     }
+
 
     /**
      * 通知代理客户端断开指定的连接，清理缓存

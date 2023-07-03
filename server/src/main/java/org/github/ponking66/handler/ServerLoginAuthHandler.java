@@ -10,11 +10,12 @@ import org.github.ponking66.pojo.LoginResp;
 import org.github.ponking66.protoctl.Header;
 import org.github.ponking66.protoctl.MessageType;
 import org.github.ponking66.protoctl.NettyMessage;
+import org.github.ponking66.util.RequestResponseUtils;
 
 import java.util.List;
 
 /**
- * 处理代理客户端授权，
+ * 处理代理客户端授权
  *
  * @author pony
  * @date 2023/4/28
@@ -33,7 +34,7 @@ public class ServerLoginAuthHandler extends Handler {
             String clientKey = rep.getClientKey();
             if (!ProxyChannelManagerFactory.getProxyChannelManager().containsKey(clientKey)) {
                 LOGGER.info("Authentication failure");
-                ctx.writeAndFlush(buildResponse(LoginResp.RespError.CLIENT_KEY_ERROR, Header.Status.FAILED));
+                ctx.writeAndFlush(RequestResponseUtils.loginResp(LoginResp.RespError.CLIENT_KEY_ERROR, Header.Status.FAILED));
                 ctx.close();
             } else {
                 LOGGER.info("Authentication success");
@@ -59,7 +60,7 @@ public class ServerLoginAuthHandler extends Handler {
             // 授权失败，cmdChannel 已经存在
             if (cacheCmdChannel != null) {
                 LOGGER.warn("Channel already exists for clientKey, channel: {}, clientKey: {}", cacheCmdChannel, clientKey);
-                ctx.writeAndFlush(buildResponse(LoginResp.RespError.LOGGED, Header.Status.FAILED));
+                ctx.writeAndFlush(RequestResponseUtils.loginResp(LoginResp.RespError.LOGGED, Header.Status.FAILED));
                 ctx.close();
             } else {
                 LOGGER.info("Bind port, clientKey: {}, ports: [{}], channel: {}", clientKey, ports, ctx.channel());
@@ -71,7 +72,7 @@ public class ServerLoginAuthHandler extends Handler {
                     for (UserApplication userApplication : userApplications) {
                         userApplication.start(clientKey);
                     }
-                    ctx.writeAndFlush(buildResponse(null, Header.Status.SUCCESS));
+                    ctx.writeAndFlush(RequestResponseUtils.loginResp(null, Header.Status.SUCCESS));
                 } catch (Exception e) {
                     LOGGER.error("start user ports [{}] error, clientKey is [{}]", ports, clientKey);
                     ProxyChannelManager.removeCmdChannel(cmdChannel);
@@ -86,14 +87,5 @@ public class ServerLoginAuthHandler extends Handler {
         return MessageType.LOGIN_REQUEST;
     }
 
-    private static NettyMessage buildResponse(LoginResp.RespError error, Header.Status status) {
-        NettyMessage message = new NettyMessage();
-        Header header = new Header();
-        header.setType(MessageType.LOGIN_RESPONSE);
-        message.setHeader(header);
-        header.setStatus(status.getVal());
-        message.setBody(new LoginResp(error));
-        return message;
-    }
 
 }

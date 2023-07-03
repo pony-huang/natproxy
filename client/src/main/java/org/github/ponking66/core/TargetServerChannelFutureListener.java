@@ -8,10 +8,10 @@ import io.netty.channel.ChannelOption;
 import org.github.ponking66.common.AttrConstants;
 import org.github.ponking66.common.ProxyConfig;
 import org.github.ponking66.pojo.CloseChannelRep;
-import org.github.ponking66.pojo.ProxyTunnelInfoResp;
 import org.github.ponking66.protoctl.Header;
 import org.github.ponking66.protoctl.MessageType;
 import org.github.ponking66.protoctl.NettyMessage;
+import org.github.ponking66.util.RequestResponseUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -84,7 +84,7 @@ public class TargetServerChannelFutureListener implements ChannelFutureListener 
             proxyServerChannel.attr(AttrConstants.BIND_CHANNEL).set(targetServerChannel);
             targetServerChannel.attr(AttrConstants.BIND_CHANNEL).set(proxyServerChannel);
             // 通知代理服务器,代理隧道已经打通
-            proxyServerChannel.writeAndFlush(buildConnectResponse(userId));
+            proxyServerChannel.writeAndFlush(RequestResponseUtils.proxyTunnelInfoResp(userId));
             // 重新注册和目标服务器通道的读事件,可以进行数据代理传输
             targetServerChannel.config().setOption(ChannelOption.AUTO_READ, true);
             // 建立绑定关系，唯一标示缓存通道
@@ -94,15 +94,6 @@ public class TargetServerChannelFutureListener implements ChannelFutureListener 
         };
     }
 
-    private NettyMessage buildConnectResponse(String userId) {
-        ProxyTunnelInfoResp resp = new ProxyTunnelInfoResp();
-        resp.setUserId(userId);
-        resp.setToken(ProxyConfig.client().getKey());
-        NettyMessage proxyMessage = new NettyMessage();
-        proxyMessage.setHeader(new Header().setType(MessageType.CONNECT_RESPONSE));
-        proxyMessage.setBody(resp);
-        return proxyMessage;
-    }
 
     private NettyMessage buildDisconnect(String userId) {
         NettyMessage message = new NettyMessage();

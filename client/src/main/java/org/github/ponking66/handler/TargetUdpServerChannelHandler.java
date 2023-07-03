@@ -5,13 +5,10 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.socket.DatagramPacket;
 import org.github.ponking66.common.AttrConstants;
 import org.github.ponking66.core.ClientChannelManager;
-import org.github.ponking66.pojo.TransferResp;
-import org.github.ponking66.protoctl.Header;
-import org.github.ponking66.protoctl.MessageType;
 import org.github.ponking66.protoctl.NettyMessage;
+import org.github.ponking66.util.RequestResponseUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 
 import java.net.InetSocketAddress;
 
@@ -46,17 +43,16 @@ public class TargetUdpServerChannelHandler extends AbstractTargetServerChannelHa
         byte[] bytes = new byte[size];
         packet.content().readBytes(bytes);
 
-        NettyMessage message = new NettyMessage();
-        String userId = ClientChannelManager.getTargetServerChannelUserId(targetServerChannel);
-        message.setHeader(new Header().setType(MessageType.TRANSFER_RESPONSE));
+
         InetSocketAddress sender = msg.sender();
         InetSocketAddress inetSocketAddress = ClientChannelManager.getMappedAddressProxySeverUserRemoteAddress(sender);
-        TransferResp resp = new TransferResp(userId, bytes);
-        resp.setRemoteAddress(inetSocketAddress);
-        message.setBody(resp);
+        String userId = ClientChannelManager.getTargetServerChannelUserId(targetServerChannel);
+
+        NettyMessage message = RequestResponseUtils.transferResp(bytes, userId, inetSocketAddress);
 
         proxyServerChannel.writeAndFlush(message);
         LOGGER.debug("UDP proxy, write data to proxy server, {} ---> {}", targetServerChannel.remoteAddress(), proxyServerChannel.remoteAddress());
     }
+
 
 }

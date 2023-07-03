@@ -21,7 +21,7 @@ public class LoginResp implements Serializable {
         this.error = error;
     }
 
-    public static enum RespError {
+    public enum RespError {
 
         /**
          * 已登录

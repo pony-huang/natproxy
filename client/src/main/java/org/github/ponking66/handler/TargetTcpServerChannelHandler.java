@@ -7,17 +7,15 @@ import org.github.ponking66.common.AttrConstants;
 import org.github.ponking66.common.ProxyConfig;
 import org.github.ponking66.core.ClientChannelManager;
 import org.github.ponking66.pojo.CloseChannelRep;
-import org.github.ponking66.pojo.TransferResp;
 import org.github.ponking66.protoctl.Header;
 import org.github.ponking66.protoctl.MessageType;
 import org.github.ponking66.protoctl.NettyMessage;
+import org.github.ponking66.util.RequestResponseUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
 /**
- *
- *
  * @author pony
  * @date 2023/4/28
  */
@@ -48,13 +46,13 @@ public class TargetTcpServerChannelHandler extends AbstractTargetServerChannelHa
         byte[] data = new byte[msg.readableBytes()];
         msg.readBytes(data);
         String userId = ClientChannelManager.getTargetServerChannelUserId(targetServerChannel);
-        NettyMessage message = new NettyMessage();
-        message.setHeader(new Header().setType(MessageType.TRANSFER_RESPONSE));
-        TransferResp resp = new TransferResp(userId, data);
-        message.setBody(resp);
+
+        NettyMessage message = RequestResponseUtils.transferResp(data, userId);
+
         proxyServerChannel.writeAndFlush(message);
         LOGGER.debug("TCP proxy, write data to proxy server, {} ---> {}", targetServerChannel.remoteAddress(), proxyServerChannel.remoteAddress());
     }
+
 
     /**
      * 代理客户端和目标服务器的连接断开时，关闭移除channel，并且通知代理服务器关闭此服务
