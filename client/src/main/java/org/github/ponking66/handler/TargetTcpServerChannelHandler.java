@@ -16,6 +16,8 @@ import org.slf4j.LoggerFactory;
 
 
 /**
+ * 处理代理客户端和目标服务器（TCP）
+ *
  * @author pony
  * @date 2023/4/28
  */
@@ -34,7 +36,6 @@ public class TargetTcpServerChannelHandler extends AbstractTargetServerChannelHa
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, ByteBuf msg) throws Exception {
         Channel targetServerChannel = ctx.channel();
-        // 与代理服务器的Channel
         Channel proxyServerChannel = targetServerChannel.attr(AttrConstants.BIND_CHANNEL).get();
         // 若是代理客户端和代理服务器都已经断开连接，则关闭目标服务器
         if (proxyServerChannel == null) {
@@ -46,16 +47,13 @@ public class TargetTcpServerChannelHandler extends AbstractTargetServerChannelHa
         byte[] data = new byte[msg.readableBytes()];
         msg.readBytes(data);
         String userId = ClientChannelManager.getTargetServerChannelUserId(targetServerChannel);
-
         NettyMessage message = RequestResponseUtils.transferResp(data, userId);
-
         proxyServerChannel.writeAndFlush(message);
         LOGGER.debug("TCP proxy, write data to proxy server, {} ---> {}", targetServerChannel.remoteAddress(), proxyServerChannel.remoteAddress());
     }
 
-
     /**
-     * 代理客户端和目标服务器的连接断开时，关闭移除channel，并且通知代理服务器关闭此服务
+     * 代理客户端和目标服务器的连接断开时需要关闭移除channel，并且通知代理服务器关闭此服务
      */
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {

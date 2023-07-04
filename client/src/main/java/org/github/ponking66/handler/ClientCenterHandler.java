@@ -30,21 +30,21 @@ public class ClientCenterHandler extends ChannelInboundHandlerAdapter {
     }
 
     /**
-     * 销毁控制连接的channel，回收数据连接的channel
+     * 销毁控制连接的channel(cmdServerChannel)，回收数据连接的channel
      */
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         Channel proxyServerChannel = ctx.channel();
-        // 如果控制连接的channel close了
+        // 如果控制连接的channel（cmdServerChannel） close
         if (proxyServerChannel == ClientChannelManager.getCmdChannel()) {
-            // GC 控制连接的channel
+            // 清空控制连接的channel
             ClientChannelManager.setCmdChannel(null);
-            // 通知所有的真实服务器close socket，关闭所有和真实服务器的channel
+            // 通知所有的目标服务器并关闭所有和目标服务器的channel
             ClientChannelManager.clearTargetServerChannels();
             // 尝试重连代理服务器
             clientApplication.start();
         } else {
-            // 如果是数据传输的channel，则直接关闭
+            // 如果是数据传输的channel（proxyServerChannel），则直接关闭
             Channel targetServerChannel = proxyServerChannel.attr(AttrConstants.BIND_CHANNEL).get();
             if (targetServerChannel != null && targetServerChannel.isActive()) {
                 targetServerChannel.close();

@@ -38,7 +38,7 @@ public class ClientApplication implements Application {
     private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
 
     /**
-     * 代理服务器启动器
+     * 代理客户端启动器
      */
     private final Bootstrap proxyServerBootstrap = new Bootstrap();
 
@@ -50,7 +50,7 @@ public class ClientApplication implements Application {
 
     private final ExecutorService executor = Executors.newScheduledThreadPool(1);
 
-    private volatile boolean success = false;
+    private volatile boolean isSuccess = false;
 
     private final AtomicInteger errorTimes = new AtomicInteger(0);
 
@@ -109,10 +109,10 @@ public class ClientApplication implements Application {
     public void connect() throws InterruptedException {
         ChannelFuture cf = proxyServerBootstrap.connect(host, port);
         executor.execute(() -> {
-            while (!success) {
+            while (!isSuccess) {
                 try {
                     TimeUnit.SECONDS.sleep(1);
-                    if (!success) {
+                    if (!isSuccess) {
                         LOGGER.info("Connection wait");
                     }
                 } catch (InterruptedException e) {
@@ -125,7 +125,7 @@ public class ClientApplication implements Application {
             if (future.isSuccess()) {
                 LOGGER.info("Successful connection");
                 // Reset
-                success = true;
+                isSuccess = true;
                 errorTimes.set(0);
                 // Login
                 NettyMessage message = RequestResponseUtils.loginRep(ProxyConfig.client().getKey());
@@ -141,7 +141,7 @@ public class ClientApplication implements Application {
                         e.printStackTrace();
                     }
                 }, delay, TimeUnit.MILLISECONDS);
-                success = false;
+                isSuccess = false;
                 errorTimes.incrementAndGet();
             }
         });

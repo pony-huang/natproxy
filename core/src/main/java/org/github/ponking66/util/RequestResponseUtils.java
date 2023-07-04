@@ -78,4 +78,21 @@ public class RequestResponseUtils {
         return message;
     }
 
+    public static NettyMessage heartbeatRequest() {
+        NettyMessage message = new NettyMessage();
+        Header header = new Header();
+        header.setType(MessageType.HEARTBEAT_REQUEST);
+        message.setHeader(header);
+        return message;
+    }
+
+    public static NettyMessage disconnect(String userId) {
+        NettyMessage message = new NettyMessage();
+        Header header = new Header();
+        header.setType(MessageType.DISCONNECT);
+        message.setHeader(header);
+        message.setBody(new CloseChannelRep(userId, null));
+        return message;
+    }
+
 }

@@ -14,7 +14,7 @@ import java.net.InetSocketAddress;
 
 
 /**
- * 处理代理客户端和目标服务器 msg 的 handler
+ * 处理代理客户端和目标服务器（UDP）
  *
  * @author pony
  * @date 2023/4/28
@@ -29,7 +29,6 @@ public class TargetUdpServerChannelHandler extends AbstractTargetServerChannelHa
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, DatagramPacket msg) throws Exception {
         Channel targetServerChannel = ctx.channel();
-        // 和 代理服务器的Channel
         Channel proxyServerChannel = targetServerChannel.attr(AttrConstants.BIND_CHANNEL).get();
         // 如果代理客户端和代理服务器已经断开连接
         if (proxyServerChannel == null) {
@@ -37,12 +36,12 @@ public class TargetUdpServerChannelHandler extends AbstractTargetServerChannelHa
             targetServerChannel.close();
             return;
         }
+
         // 目标服务器响应的消息
         DatagramPacket packet = msg.duplicate();
         int size = packet.content().readableBytes();
         byte[] bytes = new byte[size];
         packet.content().readBytes(bytes);
-
 
         InetSocketAddress sender = msg.sender();
         InetSocketAddress inetSocketAddress = ClientChannelManager.getMappedAddressProxySeverUserRemoteAddress(sender);

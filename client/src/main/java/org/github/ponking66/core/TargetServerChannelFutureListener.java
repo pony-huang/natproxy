@@ -7,9 +7,6 @@ import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelOption;
 import org.github.ponking66.common.AttrConstants;
 import org.github.ponking66.common.ProxyConfig;
-import org.github.ponking66.pojo.CloseChannelRep;
-import org.github.ponking66.protoctl.Header;
-import org.github.ponking66.protoctl.MessageType;
 import org.github.ponking66.protoctl.NettyMessage;
 import org.github.ponking66.util.RequestResponseUtils;
 import org.slf4j.Logger;
@@ -40,21 +37,20 @@ public class TargetServerChannelFutureListener implements ChannelFutureListener 
         if (future.isSuccess()) {
             final Channel targetServerChannel = future.channel();
             LOGGER.debug("The target server is successfully connected, channel: {}", targetServerChannel);
-            // 由于和代理服务器的通道还未打通，所以先注销掉和目标服务器通道的读事件
-            // 避免读缓冲区内存占用过多
+            // 由于和代理服务器的通道还未打通，所以先注销掉和目标服务器通道的读事件,避免读缓冲区内存占用过多
             targetServerChannel.config().setOption(ChannelOption.AUTO_READ, false);
             // 建立和代理服务器的通道，同时绑定两个通道的关系
             bind(targetServerChannel, cmdChannel);
         } else {
-            cmdChannel.writeAndFlush(buildDisconnect(null));
+            // 初始登录失败通知代理服务器关闭对应关系channel
+            cmdChannel.writeAndFlush(RequestResponseUtils.disconnect(null));
         }
     }
 
     private void bind(Channel targetServerChannel, Channel cmdChannel) {
-        // 建立隧道
+        // 建立隧道 proxyServerChannel
         proxyServerBootstrap.connect(ProxyConfig.getServerHost(), ProxyConfig.getServerPort())
                 .addListener((ChannelFutureListener) future -> {
-                    // 连接成功
                     final Channel proxyServerChannel = future.channel();
                     if (future.isSuccess()) {
                         // 绑定
@@ -64,7 +60,7 @@ public class TargetServerChannelFutureListener implements ChannelFutureListener 
                     } else {
                         LOGGER.warn("Failed to connect proxy server, cause: ", future.cause());
                         // 通知代理服务器关闭此代理服务（关闭端口监听）
-                        NettyMessage nettyMessage = buildDisconnect(null);
+                        NettyMessage nettyMessage = RequestResponseUtils.disconnect(userId);
                         proxyServerChannel.writeAndFlush(nettyMessage);
                         cmdChannel.writeAndFlush(nettyMessage);
                     }
@@ -73,7 +69,7 @@ public class TargetServerChannelFutureListener implements ChannelFutureListener 
 
     private Consumer<Channel> connectFailed(Channel cmdChannel) {
         return channel -> {
-            cmdChannel.writeAndFlush(buildDisconnect(userId));
+            cmdChannel.writeAndFlush(RequestResponseUtils.disconnect(userId));
         };
     }
 
@@ -89,20 +85,10 @@ public class TargetServerChannelFutureListener implements ChannelFutureListener 
             targetServerChannel.config().setOption(ChannelOption.AUTO_READ, true);
             // 建立绑定关系，唯一标示缓存通道
             ClientChannelManager.addTargetServerChannel(userId, targetServerChannel);
-            // 建立绑定关系，唯一标示缓存通道
             ClientChannelManager.setTargetServerChannelUserId(targetServerChannel, userId);
         };
     }
 
-
-    private NettyMessage buildDisconnect(String userId) {
-        NettyMessage message = new NettyMessage();
-        Header header = new Header();
-        header.setType(MessageType.DISCONNECT);
-        message.setHeader(header);
-        message.setBody(new CloseChannelRep(userId, null));
-        return message;
-    }
 
     /**
      * 代理客户端和目标服务器建立通道后调用此方法
@@ -116,7 +102,7 @@ public class TargetServerChannelFutureListener implements ChannelFutureListener 
     public void borrowProxyChanel(Bootstrap proxyServerBootstrap, Consumer<Channel> successListener, Consumer<Channel> failedListener) {
         // 返回并移除队列队头的channel
         Channel channel = ClientChannelManager.poolChannel();
-        // 如果有可用的channel
+        // 若存在可用的channel
         if (channel != null) {
             // 绑定隧道映射关系
             // 目标服务器 <---> 代理客户端；代理客户端 <---> 代理服务器

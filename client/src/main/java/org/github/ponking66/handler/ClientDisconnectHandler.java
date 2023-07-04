@@ -17,19 +17,16 @@ public class ClientDisconnectHandler extends Handler {
 
     @Override
     public void handleRead(ChannelHandlerContext ctx, NettyMessage message) {
-        // 1 解除隧道关系绑定
-        // 2 返回proxyServerChannel给连接池
-        // 3 通知目标服务器关闭 socket，然后 close channel
         Channel proxyServerChannel = ctx.channel();
         Channel targetServerChannel = proxyServerChannel.attr(AttrConstants.BIND_CHANNEL).get();
         if (targetServerChannel != null) {
-            // 解除关系绑定
+            // /解除隧道关系绑定
             proxyServerChannel.attr(AttrConstants.BIND_CHANNEL).set(null);
-            // 返回连接池
+            // 清空 ProxyServerChannel
             ClientChannelManager.returnProxyChannel(proxyServerChannel);
-            // 通知目标服务器关闭 socket，然后 close channel
+            // 通知目标服务器关闭socket，并且关闭客户端socket
             targetServerChannel.writeAndFlush(Unpooled.EMPTY_BUFFER).addListener(ChannelFutureListener.CLOSE);
-            LOGGER.info("Close the target server channel.");
+            LOGGER.info("Close the target server channel");
         }
     }
 

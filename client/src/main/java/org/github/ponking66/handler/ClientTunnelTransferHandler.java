@@ -29,8 +29,10 @@ public class ClientTunnelTransferHandler extends Handler {
             LOGGER.warn("TargetServerChannel is null");
             return;
         }
+
         TransferRep rep = (TransferRep) message.getBody();
         if (targetServerChannel instanceof NioDatagramChannel) {
+
             byte[] data = rep.getContent();
             ByteBuf buf = Unpooled.buffer(data.length);
             buf.writeBytes(data);
@@ -39,23 +41,25 @@ public class ClientTunnelTransferHandler extends Handler {
             ClientChannelManager.bindMappedAddress(targetSeverLocalAddress, proxySeverRemoteAddress);
             DatagramPacket packet = new DatagramPacket(buf, targetSeverLocalAddress);
             targetServerChannel.writeAndFlush(packet);
-            LOGGER.debug("Write data to target server. {}", targetServerChannel);
+            LOGGER.debug("Write data to target server, {}", targetServerChannel);
 
         } else if (targetServerChannel instanceof NioSocketChannel) {
+
             byte[] data = rep.getContent();
             ByteBuf buf = Unpooled.buffer(data.length);
             buf.writeBytes(data);
             targetServerChannel.writeAndFlush(buf);
-            LOGGER.debug("Write data to target server. {}", targetServerChannel);
+            LOGGER.debug("Write data to target server, {}", targetServerChannel);
 
         } else {
-            LOGGER.warn("Illegal channel, cannot transfer. {}", targetServerChannel);
+            LOGGER.warn("Illegal channel, cannot transfer, {}", targetServerChannel);
         }
+
     }
 
 
     /**
-     * 平衡读写速度，防止内存占用过多出现OOM
+     * 平衡读写速度
      */
     @Override
     public void channelWritabilityChanged(ChannelHandlerContext ctx) throws Exception {

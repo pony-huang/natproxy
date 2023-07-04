@@ -20,11 +20,12 @@ public abstract class AbstractTargetServerChannelHandler<T> extends SimpleChanne
     protected final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
 
     /**
-     * 平衡读写速度，防止内存占用过多，出现OOM
+     * 平衡读写速度
      */
     @Override
     public void channelWritabilityChanged(ChannelHandlerContext ctx) throws Exception {
         Channel targetServerChannel = ctx.channel();
+        // 与代理服务器的Channel
         Channel proxyServerChannel = targetServerChannel.attr(AttrConstants.BIND_CHANNEL).get();
         if (proxyServerChannel != null) {
             boolean writable = targetServerChannel.isWritable();
@@ -33,9 +34,4 @@ public abstract class AbstractTargetServerChannelHandler<T> extends SimpleChanne
         super.channelWritabilityChanged(ctx);
     }
 
-    @Override
-    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        LOGGER.error("exceptionCaught", cause);
-        super.exceptionCaught(ctx, cause);
-    }
 }

@@ -149,10 +149,10 @@ public class ClientChannelManager {
     public static void clearTargetServerChannels() {
         LOGGER.warn("channel closed, clear Target server channels");
 
-        for (Map.Entry<String, Channel> stringChannelEntry : TARGET_SERVER_CHANNELS.entrySet()) {
-            Channel TargetServerChannel = stringChannelEntry.getValue();
+        for (Map.Entry<String, Channel> targetChannel : TARGET_SERVER_CHANNELS.entrySet()) {
+            Channel TargetServerChannel = targetChannel.getValue();
             if (TargetServerChannel.isActive()) {
-                // 通知真实服务端关闭socket
+                // 通知目标服务端关闭socket
                 TargetServerChannel.writeAndFlush(Unpooled.EMPTY_BUFFER).addListener(ChannelFutureListener.CLOSE);
             }
         }
