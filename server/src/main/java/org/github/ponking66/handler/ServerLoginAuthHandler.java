@@ -37,7 +37,7 @@ public class ServerLoginAuthHandler extends Handler {
                 ctx.writeAndFlush(RequestResponseUtils.loginResp(LoginResp.RespError.CLIENT_KEY_ERROR, Header.Status.FAILED));
                 ctx.close();
             } else {
-                LOGGER.info("Authentication success");
+                LOGGER.info("Authentication success, clientKey: {}", clientKey);
                 bindProxySeverChannel(ctx, clientKey);
             }
         } else {
@@ -63,7 +63,6 @@ public class ServerLoginAuthHandler extends Handler {
                 ctx.writeAndFlush(RequestResponseUtils.loginResp(LoginResp.RespError.LOGGED, Header.Status.FAILED));
                 ctx.close();
             } else {
-                LOGGER.info("Bind port, clientKey: {}, ports: [{}], channel: {}", clientKey, ports, ctx.channel());
                 Channel cmdChannel = ctx.channel();
                 // 授权成功，设置cmdChannel相关的映射关系，缓存cmdChannel
                 ProxyChannelManager.addCmdChannel(ports, clientKey, cmdChannel);
