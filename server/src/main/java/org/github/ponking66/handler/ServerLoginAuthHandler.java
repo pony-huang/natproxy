@@ -47,38 +47,41 @@ public class ServerLoginAuthHandler extends Handler {
     }
 
     private void bindProxySeverChannel(ChannelHandlerContext ctx, String clientKey) {
-        // 获取该客户端下的映射端口
+        // 获取该客户端对应服务器映射端口
         List<Integer> ports = ProxyChannelManagerFactory.getProxyChannelManager().extranetPortByClientKey(clientKey);
         // 授权失败，客户端秘钥错误
         if (ports.isEmpty()) {
             LOGGER.warn("Error clientKey: {}", clientKey);
             ctx.close();
-        } else {
-            // 第一次建立连接 cmdChannel 应该为  null
-            Channel cacheCmdChannel = ProxyChannelManager.getCmdChannel(clientKey);
-            // 第二次试图在建立 cmdChannel
-            // 授权失败，cmdChannel 已经存在
-            if (cacheCmdChannel != null) {
-                LOGGER.warn("Channel already exists for clientKey, channel: {}, clientKey: {}", cacheCmdChannel, clientKey);
-                ctx.writeAndFlush(RequestResponseUtils.loginResp(LoginResp.RespError.LOGGED, Header.Status.FAILED));
-                ctx.close();
-            } else {
-                Channel cmdChannel = ctx.channel();
-                // 授权成功，设置cmdChannel相关的映射关系，缓存cmdChannel
-                ProxyChannelManager.addCmdChannel(ports, clientKey, cmdChannel);
-                try {
-                    // 开启用户端口监听
-                    for (UserApplication userApplication : userApplications) {
-                        userApplication.start(clientKey);
-                    }
-                    ctx.writeAndFlush(RequestResponseUtils.loginResp(null, Header.Status.SUCCESS));
-                } catch (Exception e) {
-                    LOGGER.error("start user ports [{}] error, clientKey is [{}]", ports, clientKey);
-                    ProxyChannelManager.removeCmdChannel(cmdChannel);
-                    ctx.close();
-                }
-            }
+            return;
         }
+
+        // 第一次建立连接 cmdChannel 应该为  null
+        Channel cacheCmdChannel = ProxyChannelManager.getCmdChannel(clientKey);
+        // 第二次试图在建立 cmdChannel
+        // 授权失败，cmdChannel 已经存在
+        if (cacheCmdChannel != null) {
+            LOGGER.warn("Channel already exists for clientKey, channel: {}, clientKey: {}", cacheCmdChannel, clientKey);
+            ctx.writeAndFlush(RequestResponseUtils.loginResp(LoginResp.RespError.LOGGED, Header.Status.FAILED));
+            ctx.close();
+            return;
+        }
+
+        Channel cmdChannel = ctx.channel();
+        // 授权成功，设置cmdChannel相关的映射关系，缓存cmdChannel
+        ProxyChannelManager.addCmdChannel(ports, clientKey, cmdChannel);
+        try {
+            // 开启用户端口监听
+            for (UserApplication userApplication : userApplications) {
+                userApplication.start(clientKey);
+            }
+            ctx.writeAndFlush(RequestResponseUtils.loginResp(null, Header.Status.SUCCESS));
+        } catch (Exception e) {
+            LOGGER.error("start user ports [{}] error, clientKey is [{}]", ports, clientKey);
+            ProxyChannelManager.removeCmdChannel(cmdChannel);
+            ctx.close();
+        }
+
     }
 
     @Override

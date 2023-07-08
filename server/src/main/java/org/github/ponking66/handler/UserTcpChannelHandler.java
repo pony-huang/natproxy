@@ -47,34 +47,34 @@ public class UserTcpChannelHandler extends AbstractUserChannelHandler<ByteBuf> {
 
 
     /**
-     * 通知代理客户端断开指定的连接，清理缓存
+     * 通知代理客户端断开指定的连接
      */
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         Channel userChannel = ctx.channel();
         InetSocketAddress localAddress = (InetSocketAddress) userChannel.localAddress();
         Channel cmdChannel = ProxyChannelManager.getCmdChannel(localAddress.getPort());
+
+        // 如果没有对应的代理客户端，直接关闭连接
         if (cmdChannel == null) {
-            // 如果没有对应的代理客户端，直接关闭连接
             ctx.close();
-        } else {
-            // 通知代理客户端断开指定的连接，清理缓存
-            String userId = ProxyChannelManager.getUserChannelUserId(userChannel);
-            ProxyChannelManager.removeUserChannelFromCmdChannel(cmdChannel, userId);
-            Channel proxyChannel = userChannel.attr(AttrConstants.BIND_CHANNEL).get();
-            if (proxyChannel != null && proxyChannel.isActive()) {
-                // 清理绑定关系
-                ProxyChannelManager.unbind(proxyChannel);
-                // 设置可读
-                proxyChannel.config().setOption(ChannelOption.AUTO_READ, true);
-                // 通知客户端，用户连接已经断开
-                NettyMessage message = new NettyMessage();
-                message.setHeader(new Header().setType(MessageType.DISCONNECT));
-                CloseChannelRep rep = new CloseChannelRep(userId, null);
-                message.setBody(rep);
-                proxyChannel.writeAndFlush(message);
-            }
+            return;
         }
+
+        // 通知代理客户端断开指定的连接，清理缓存
+        String userId = ProxyChannelManager.getUserChannelUserId(userChannel);
+        ProxyChannelManager.removeUserChannelFromCmdChannel(cmdChannel, userId);
+        Channel proxyChannel = userChannel.attr(AttrConstants.BIND_CHANNEL).get();
+        if (proxyChannel != null && proxyChannel.isActive()) {
+            // 清理绑定关系
+            ProxyChannelManager.unbind(proxyChannel);
+            // 设置可读
+            proxyChannel.config().setOption(ChannelOption.AUTO_READ, true);
+            // 通知客户端，用户连接已经断开
+            proxyChannel.writeAndFlush(RequestResponseUtils.disconnect(userId));
+        }
+
+
         super.channelInactive(ctx);
     }
 }

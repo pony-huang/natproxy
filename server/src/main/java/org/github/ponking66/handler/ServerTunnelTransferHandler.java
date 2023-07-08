@@ -32,14 +32,15 @@ public class ServerTunnelTransferHandler extends Handler {
         }
 
         Channel userChannel = proxyChannel.attr(AttrConstants.BIND_CHANNEL).get();
-        // 如果userChannel已经关闭了，关闭proxyChannel
+        // 如果userChannel已关闭了，则关闭proxyChannel
         if (userChannel == null || !userChannel.isActive()) {
             LOGGER.info("userChannel is close, userChannel=[{}]", userChannel);
             ctx.close();
             return;
         }
-        TransferResp resp = (TransferResp) message.getBody();
 
+
+        TransferResp resp = (TransferResp) message.getBody();
         byte[] data = resp.getContent();
         ByteBuf buf = Unpooled.buffer(data.length);
         buf.writeBytes(data);
@@ -57,9 +58,9 @@ public class ServerTunnelTransferHandler extends Handler {
     }
 
     /**
-     * 平衡读写速度，防止内存占用过多导致OOM
+     * 平衡读写速度
      * <p>
-     * 如果代理服务器出站缓存区数据达到高警戒位则触发此方法，注销userChannel的读事件避免缓存大量数据
+     * 如果代理服务器出站缓存区数据达到高警戒位则触发此方法,注销userChannel的读事件避免缓存大量数据
      */
     @Override
     public void channelWritabilityChanged(ChannelHandlerContext ctx) throws Exception {

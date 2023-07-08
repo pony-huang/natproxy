@@ -67,21 +67,13 @@ public class ServerDisconnectHandler extends Handler {
     }
 
     /**
-     * 如果代理客户端断开连接：
-     * 1 如果此channel有对应的userChannel；
-     * <p>
-     * 1 清理和userChannel的关系
-     * 2 通知userChannel 可以关闭连接了
-     * 3 移除管理器缓存的此channel的引用，便于 GC
-     * </p>
-     * 2 否则，直接清除关系
+     * 代理客户端断开连接
      */
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         Channel proxyChannel = ctx.channel();
         Channel userChannel = proxyChannel.attr(AttrConstants.BIND_CHANNEL).get();
-        // 有 userChannel说明是普通的 proxyChannel
-        // 否则，就是 cmdChannel
+        // 若是存在userChannel说明是普通的proxyChannel,否则就是cmdChannel
         if (userChannel != null && userChannel.isActive()) {
             String clientKey = proxyChannel.attr(AttrConstants.CLIENT_KEY).get();
             String userId = proxyChannel.attr(AttrConstants.USER_ID).get();
@@ -94,11 +86,10 @@ public class ServerDisconnectHandler extends Handler {
             // 数据发送完成后，关闭连接
             userChannel.writeAndFlush(Unpooled.EMPTY_BUFFER).addListener(ChannelFutureListener.CLOSE);
         } else {
-            // 解除cmdChannel绑定的关系,释放端口
+            // 直接清除关系,解除cmdChannel绑定的关系,释放端口
             ProxyChannelManager.removeCmdChannel(proxyChannel);
         }
         super.channelInactive(ctx);
     }
-
 
 }
