@@ -5,6 +5,10 @@ import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.codec.protobuf.ProtobufDecoder;
+import io.netty.handler.codec.protobuf.ProtobufEncoder;
+import io.netty.handler.codec.protobuf.ProtobufVarint32FrameDecoder;
+import io.netty.handler.codec.protobuf.ProtobufVarint32LengthFieldPrepender;
 import io.netty.handler.ssl.ClientAuth;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
@@ -16,8 +20,7 @@ import org.github.ponking66.core.UserApplication;
 import org.github.ponking66.core.UsersTcpBootstrapApplication;
 import org.github.ponking66.core.UsersUdpBootstrapApplication;
 import org.github.ponking66.handler.*;
-import org.github.ponking66.protoctl.NettyMessageDecoder;
-import org.github.ponking66.protoctl.NettyMessageEncoder;
+import org.github.ponking66.proto3.NatProxyProtos;
 import org.github.ponking66.util.ObjectUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -103,8 +106,13 @@ public class ServerApplication implements Application {
     }
 
     private void initCommonHandlers(ChannelPipeline pipeline) throws IOException {
-        pipeline.addLast(new NettyMessageDecoder());
-        pipeline.addLast(new NettyMessageEncoder());
+//        pipeline.addLast(new NettyMessageDecoder());
+//        pipeline.addLast(new NettyMessageEncoder());
+        pipeline.addLast(new ProtobufVarint32FrameDecoder())
+                .addLast(new ProtobufDecoder(NatProxyProtos.Packet.getDefaultInstance()))
+                .addLast(new ProtobufVarint32LengthFieldPrepender())
+                .addLast(new ProtobufEncoder());
+
         pipeline.addLast(new IdleStateHandler(ProxyConfig.READER_IDLE_TIME_SECONDS, ProxyConfig.WRITER_IDLE_TIME_SECONDS, ProxyConfig.ALL_IDLE_TIME_SECONDS));
         pipeline.addLast(new ServerLoginAuthHandler(userApplications));
         pipeline.addLast(new ServerDisconnectHandler());

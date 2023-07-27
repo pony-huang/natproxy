@@ -12,7 +12,6 @@ import io.netty.handler.traffic.GlobalTrafficShapingHandler;
 import io.netty.handler.traffic.TrafficCounter;
 import org.github.ponking66.handler.TargetTcpServerChannelHandler;
 import org.github.ponking66.pojo.ProxyTunnelInfoReq;
-import org.github.ponking66.protoctl.NettyMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -91,8 +90,7 @@ public class TcpTargetSeverListener implements TargetServerListener {
     }
 
     @Override
-    public void listen(Channel cmdChannel, NettyMessage message) {
-        ProxyTunnelInfoReq proxyTunnelInfoReq = (ProxyTunnelInfoReq) message.getBody();
+    public void listen(Channel cmdChannel, ProxyTunnelInfoReq proxyTunnelInfoReq) {
         final String userId = proxyTunnelInfoReq.getUserId();
         // 目标服务器的 ip 和 port
         String ip = proxyTunnelInfoReq.getHost();

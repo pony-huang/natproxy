@@ -1,4 +1,4 @@
-package org.github.ponking66.protoctl;
+package org.github.ponking66.proto3;
 
 /**
  * @author pony

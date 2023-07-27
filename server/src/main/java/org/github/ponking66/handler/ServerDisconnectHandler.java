@@ -6,9 +6,7 @@ import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import org.github.ponking66.common.AttrConstants;
 import org.github.ponking66.core.ProxyChannelManager;
-import org.github.ponking66.pojo.CloseChannelRep;
-import org.github.ponking66.protoctl.MessageType;
-import org.github.ponking66.protoctl.NettyMessage;
+import org.github.ponking66.proto3.NatProxyProtos;
 
 import java.util.Optional;
 
@@ -16,29 +14,28 @@ import java.util.Optional;
  * @author pony
  * @date 2023/4/28
  */
-public class ServerDisconnectHandler extends Handler {
+public class ServerDisconnectHandler extends ProtoHandler {
 
     /**
      * 处理代理客户端的断开连接请求
      */
     @Override
-    public void handleRead(ChannelHandlerContext ctx, NettyMessage msg) {
+    public void handleRead(ChannelHandlerContext ctx, NatProxyProtos.Packet packet) {
         Channel currentChannel = ctx.channel();
         String clientKey = currentChannel.attr(AttrConstants.CLIENT_KEY).get();
         // 代理连接没有连上服务器，由cmdChannel通知用户断开连接
         if (clientKey == null) {
             LOGGER.warn("ClientKey is null");
-            if (msg.getBody() instanceof CloseChannelRep rep) {
-                String userId = rep.getUserId();
-                Optional.of(rep.getUserId()).ifPresent(data -> {
-                    Channel userChannel = ProxyChannelManager.removeUserChannelFromCmdChannel(currentChannel, userId);
-                    if (userChannel != null) {
-                        // 数据发送完成后，关闭连接
-                        userChannel.writeAndFlush(Unpooled.EMPTY_BUFFER).addListener(ChannelFutureListener.CLOSE);
-                    }
-                });
-                return;
-            }
+            NatProxyProtos.CloseChannelRequest request = packet.getCloseChannelRequest();
+            String userId = request.getUserId();
+            Optional.of(request.getUserId()).ifPresent(data -> {
+                Channel userChannel = ProxyChannelManager.removeUserChannelFromCmdChannel(currentChannel, userId);
+                if (userChannel != null) {
+                    // 数据发送完成后，关闭连接
+                    userChannel.writeAndFlush(Unpooled.EMPTY_BUFFER).addListener(ChannelFutureListener.CLOSE);
+                }
+            });
+            return;
         }
 
         // 检查clientKey
@@ -62,8 +59,8 @@ public class ServerDisconnectHandler extends Handler {
     }
 
     @Override
-    public byte getMessageType() {
-        return MessageType.DISCONNECT;
+    public NatProxyProtos.Header.MessageType getMessageType() {
+        return NatProxyProtos.Header.MessageType.DISCONNECT;
     }
 
     /**

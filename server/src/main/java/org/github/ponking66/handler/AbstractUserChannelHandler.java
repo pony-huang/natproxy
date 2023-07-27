@@ -8,9 +8,7 @@ import org.github.ponking66.common.AttrConstants;
 import org.github.ponking66.common.ProxyConfig;
 import org.github.ponking66.core.ProxyChannelManager;
 import org.github.ponking66.pojo.ProxyTunnelInfoReq;
-import org.github.ponking66.protoctl.Header;
-import org.github.ponking66.protoctl.MessageType;
-import org.github.ponking66.protoctl.NettyMessage;
+import org.github.ponking66.proto3.ProtoRequestResponseHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,10 +53,7 @@ public abstract class AbstractUserChannelHandler<T> extends SimpleChannelInbound
             // 给 cmdChannel 添加和客户端连接关系
             ProxyChannelManager.addUserChannelToCmdChannel(cmdChannel, userId, userChannel);
             // 通知代理客户端，可以连接代理端口了
-            NettyMessage proxyMessage = new NettyMessage();
-            proxyMessage.setHeader(new Header().setType(MessageType.CONNECT_REQUEST));
-            proxyMessage.setBody(proxyTunnelInfoReq);
-            cmdChannel.writeAndFlush(proxyMessage);
+            cmdChannel.writeAndFlush(ProtoRequestResponseHelper.connect(proxyTunnelInfoReq));
         }
         super.channelActive(ctx);
     }

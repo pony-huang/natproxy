@@ -5,6 +5,10 @@ import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.handler.codec.protobuf.ProtobufDecoder;
+import io.netty.handler.codec.protobuf.ProtobufEncoder;
+import io.netty.handler.codec.protobuf.ProtobufVarint32FrameDecoder;
+import io.netty.handler.codec.protobuf.ProtobufVarint32LengthFieldPrepender;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.ssl.SslContext;
@@ -14,11 +18,9 @@ import io.netty.handler.timeout.IdleStateHandler;
 import org.github.ponking66.common.ProxyConfig;
 import org.github.ponking66.common.TLSConfig;
 import org.github.ponking66.handler.*;
-import org.github.ponking66.protoctl.NettyMessage;
-import org.github.ponking66.protoctl.NettyMessageDecoder;
-import org.github.ponking66.protoctl.NettyMessageEncoder;
+import org.github.ponking66.proto3.NatProxyProtos;
 import org.github.ponking66.util.ObjectUtils;
-import org.github.ponking66.util.RequestResponseUtils;
+import org.github.ponking66.proto3.ProtoRequestResponseHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -86,11 +88,14 @@ public class ClientApplication implements Application {
                             pipeline.addLast(new SslHandler(sslContext.newEngine(ch.alloc())));
                         }
 
-                        pipeline.addLast(new NettyMessageDecoder());
-                        pipeline.addLast(new NettyMessageEncoder());
+                        pipeline.addLast(new ProtobufVarint32FrameDecoder())
+                                .addLast(new ProtobufDecoder(NatProxyProtos.Packet.getDefaultInstance()))
+                                .addLast(new ProtobufVarint32LengthFieldPrepender())
+                                .addLast(new ProtobufEncoder());
+
                         pipeline.addLast(new IdleStateHandler(ProxyConfig.READER_IDLE_TIME_SECONDS, ProxyConfig.WRITER_IDLE_TIME_SECONDS, ProxyConfig.ALL_IDLE_TIME_SECONDS));
-                        pipeline.addLast(new ClientCenterHandler(ClientApplication.this));
-                        pipeline.addLast(new ClientLoginAuthHandler(ClientApplication.this));
+                        pipeline.addLast(new ClientProxyChannelHandler(ClientApplication.this));
+                        pipeline.addLast(new ClientLoginHandler(ClientApplication.this));
                         pipeline.addLast(new ClientTunnelBindHandler(proxyServerBootstrap));
                         pipeline.addLast(new ClientTunnelTransferHandler());
                         pipeline.addLast(new ClientDisconnectHandler());
@@ -128,9 +133,7 @@ public class ClientApplication implements Application {
                 isSuccess = true;
                 errorTimes.set(0);
                 // Login
-                NettyMessage message = RequestResponseUtils.loginRep(ProxyConfig.client().getKey());
-                channel.writeAndFlush(message);
-
+                channel.writeAndFlush( ProtoRequestResponseHelper.loginRequest(ProxyConfig.client().getKey()));
             } else {
                 long delay = delay();
                 LOGGER.info("Connection failure, try again after {} milliseconds", delay);

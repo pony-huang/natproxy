@@ -7,9 +7,8 @@ import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.socket.nio.NioDatagramChannel;
 import org.github.ponking66.common.Proxy;
-import org.github.ponking66.common.ProxyConfig;
 import org.github.ponking66.handler.UserUdpChannelHandler;
-import org.github.ponking66.protoctl.ProtocType;
+import org.github.ponking66.proto3.ProtocType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

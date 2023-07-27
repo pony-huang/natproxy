@@ -6,11 +6,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelOption;
 import org.github.ponking66.common.AttrConstants;
 import org.github.ponking66.core.ProxyChannelManager;
-import org.github.ponking66.pojo.CloseChannelRep;
-import org.github.ponking66.protoctl.Header;
-import org.github.ponking66.protoctl.MessageType;
-import org.github.ponking66.protoctl.NettyMessage;
-import org.github.ponking66.util.RequestResponseUtils;
+import org.github.ponking66.proto3.ProtoRequestResponseHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,7 +35,7 @@ public class UserTcpChannelHandler extends AbstractUserChannelHandler<ByteBuf> {
             byte[] data = new byte[msg.readableBytes()];
             msg.readBytes(data);
             String userId = ProxyChannelManager.getUserChannelUserId(userChannel);
-            proxyChannel.writeAndFlush(RequestResponseUtils.transferRep(data, userId));
+            proxyChannel.writeAndFlush(ProtoRequestResponseHelper.transferRequest(data, userId));
         } else {
             LOGGER.error("Message dropped.");
         }
@@ -71,9 +67,8 @@ public class UserTcpChannelHandler extends AbstractUserChannelHandler<ByteBuf> {
             // 设置可读
             proxyChannel.config().setOption(ChannelOption.AUTO_READ, true);
             // 通知客户端，用户连接已经断开
-            proxyChannel.writeAndFlush(RequestResponseUtils.disconnect(userId));
+            proxyChannel.writeAndFlush(ProtoRequestResponseHelper.disconnect(userId));
         }
-
 
         super.channelInactive(ctx);
     }

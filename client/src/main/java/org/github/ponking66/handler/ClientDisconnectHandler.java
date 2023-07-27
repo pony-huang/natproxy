@@ -6,17 +6,20 @@ import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import org.github.ponking66.common.AttrConstants;
 import org.github.ponking66.core.ClientChannelManager;
-import org.github.ponking66.protoctl.MessageType;
-import org.github.ponking66.protoctl.NettyMessage;
+import org.github.ponking66.proto3.NatProxyProtos;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author pony
  * @date 2023/4/28
  */
-public class ClientDisconnectHandler extends Handler {
+public class ClientDisconnectHandler extends ProtoHandler {
+
+
 
     @Override
-    public void handleRead(ChannelHandlerContext ctx, NettyMessage message) {
+    public void handleRead(ChannelHandlerContext ctx, NatProxyProtos.Packet packet) {
         Channel proxyServerChannel = ctx.channel();
         Channel targetServerChannel = proxyServerChannel.attr(AttrConstants.BIND_CHANNEL).get();
         if (targetServerChannel != null) {
@@ -31,8 +34,8 @@ public class ClientDisconnectHandler extends Handler {
     }
 
     @Override
-    public byte getMessageType() {
-        return MessageType.DISCONNECT;
+    public NatProxyProtos.Header.MessageType getMessageType() {
+        return NatProxyProtos.Header.MessageType.DISCONNECT;
     }
 
 }

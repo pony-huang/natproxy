@@ -5,7 +5,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.socket.DatagramPacket;
 import org.github.ponking66.common.AttrConstants;
 import org.github.ponking66.core.ProxyChannelManager;
-import org.github.ponking66.util.RequestResponseUtils;
+import org.github.ponking66.proto3.ProtoRequestResponseHelper;
 
 import java.net.InetSocketAddress;
 
@@ -31,7 +31,8 @@ public class UserUdpChannelHandler extends AbstractUserChannelHandler<DatagramPa
         msg.content().readBytes(bytes);
         String userId = ProxyChannelManager.getUserChannelUserId(userChannel);
         InetSocketAddress sender = msg.sender();
-        proxyChannel.writeAndFlush(RequestResponseUtils.transferRep(bytes, userId, sender));
+
+        proxyChannel.writeAndFlush(ProtoRequestResponseHelper.transferRequest(bytes, userId, sender));
     }
 
 

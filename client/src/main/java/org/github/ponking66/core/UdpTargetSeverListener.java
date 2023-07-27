@@ -8,7 +8,6 @@ import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import org.github.ponking66.handler.TargetUdpServerChannelHandler;
 import org.github.ponking66.pojo.ProxyTunnelInfoReq;
-import org.github.ponking66.protoctl.NettyMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,8 +44,7 @@ public class UdpTargetSeverListener implements TargetServerListener {
     }
 
     @Override
-    public void listen(Channel cmdChannel, NettyMessage message) {
-        ProxyTunnelInfoReq proxyTunnelInfoReq = (ProxyTunnelInfoReq) message.getBody();
+    public void listen(Channel cmdChannel, ProxyTunnelInfoReq proxyTunnelInfoReq) {
         // userId
         final String userId = proxyTunnelInfoReq.getUserId();
         // 目标服务器的 ip 和 port

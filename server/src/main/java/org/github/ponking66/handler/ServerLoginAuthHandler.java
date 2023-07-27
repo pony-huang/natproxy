@@ -5,12 +5,8 @@ import io.netty.channel.ChannelHandlerContext;
 import org.github.ponking66.core.ProxyChannelManager;
 import org.github.ponking66.core.ProxyChannelManagerFactory;
 import org.github.ponking66.core.UserApplication;
-import org.github.ponking66.pojo.LoginRep;
-import org.github.ponking66.pojo.LoginResp;
-import org.github.ponking66.protoctl.Header;
-import org.github.ponking66.protoctl.MessageType;
-import org.github.ponking66.protoctl.NettyMessage;
-import org.github.ponking66.util.RequestResponseUtils;
+import org.github.ponking66.proto3.NatProxyProtos;
+import org.github.ponking66.proto3.ProtoRequestResponseHelper;
 
 import java.util.List;
 
@@ -20,7 +16,7 @@ import java.util.List;
  * @author pony
  * @date 2023/4/28
  */
-public class ServerLoginAuthHandler extends Handler {
+public class ServerLoginAuthHandler extends ProtoHandler {
 
     private final List<UserApplication> userApplications;
 
@@ -29,21 +25,17 @@ public class ServerLoginAuthHandler extends Handler {
     }
 
     @Override
-    public void handleRead(ChannelHandlerContext ctx, NettyMessage message) {
-        if (message.getBody() instanceof LoginRep rep) {
-            String clientKey = rep.getClientKey();
-            if (!ProxyChannelManagerFactory.getProxyChannelManager().containsKey(clientKey)) {
-                LOGGER.info("Authentication failure");
-                ctx.writeAndFlush(RequestResponseUtils.loginResp(LoginResp.RespError.CLIENT_KEY_ERROR, Header.Status.FAILED));
-                ctx.close();
-            } else {
-                LOGGER.info("Authentication success, clientKey: {}", clientKey);
-                bindProxySeverChannel(ctx, clientKey);
-            }
+    public void handleRead(ChannelHandlerContext ctx, NatProxyProtos.Packet packet) {
+        NatProxyProtos.LoginRequest request = packet.getLoginRequest();
+        String clientKey = request.getClientKey();
+        if (!ProxyChannelManagerFactory.getProxyChannelManager().containsKey(clientKey)) {
+            LOGGER.info("Authentication failure");
+            ctx.writeAndFlush(ProtoRequestResponseHelper.loginResponse(NatProxyProtos.LoginResponse.ResponseError.CLIENT_KEY_ERROR, NatProxyProtos.Header.Status.FAILED));
+            ctx.close();
         } else {
-            LOGGER.warn("Connect message error. ProxyTunnelInfoResp is null");
+            LOGGER.info("Authentication success, clientKey: {}", clientKey);
+            bindProxySeverChannel(ctx, clientKey);
         }
-
     }
 
     private void bindProxySeverChannel(ChannelHandlerContext ctx, String clientKey) {
@@ -62,7 +54,7 @@ public class ServerLoginAuthHandler extends Handler {
         // 授权失败，cmdChannel 已经存在
         if (cacheCmdChannel != null) {
             LOGGER.warn("Channel already exists for clientKey, channel: {}, clientKey: {}", cacheCmdChannel, clientKey);
-            ctx.writeAndFlush(RequestResponseUtils.loginResp(LoginResp.RespError.LOGGED, Header.Status.FAILED));
+            ctx.writeAndFlush(ProtoRequestResponseHelper.loginResponse(NatProxyProtos.LoginResponse.ResponseError.LOGGED, NatProxyProtos.Header.Status.FAILED));
             ctx.close();
             return;
         }
@@ -75,7 +67,7 @@ public class ServerLoginAuthHandler extends Handler {
             for (UserApplication userApplication : userApplications) {
                 userApplication.start(clientKey);
             }
-            ctx.writeAndFlush(RequestResponseUtils.loginResp(null, Header.Status.SUCCESS));
+            ctx.writeAndFlush(ProtoRequestResponseHelper.loginResponse(NatProxyProtos.LoginResponse.ResponseError.SUCCESS, NatProxyProtos.Header.Status.SUCCESS));
         } catch (Exception e) {
             LOGGER.error("start user ports [{}] error, clientKey is [{}]", ports, clientKey);
             ProxyChannelManager.removeCmdChannel(cmdChannel);
@@ -85,8 +77,8 @@ public class ServerLoginAuthHandler extends Handler {
     }
 
     @Override
-    public byte getMessageType() {
-        return MessageType.LOGIN_REQUEST;
+    public NatProxyProtos.Header.MessageType getMessageType() {
+        return NatProxyProtos.Header.MessageType.LOGIN_REQUEST;
     }
 
 

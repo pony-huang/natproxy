@@ -9,9 +9,7 @@ import io.netty.channel.socket.DatagramPacket;
 import io.netty.channel.socket.nio.NioDatagramChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import org.github.ponking66.common.AttrConstants;
-import org.github.ponking66.pojo.TransferResp;
-import org.github.ponking66.protoctl.MessageType;
-import org.github.ponking66.protoctl.NettyMessage;
+import org.github.ponking66.proto3.NatProxyProtos;
 
 import java.net.InetSocketAddress;
 
@@ -21,11 +19,12 @@ import java.net.InetSocketAddress;
  * @author pony
  * @date 2023/5/18
  */
-public class ServerTunnelTransferHandler extends Handler {
+public class ServerTunnelTransferHandler extends ProtoHandler {
 
     @Override
-    public void handleRead(ChannelHandlerContext ctx, NettyMessage message) {
+    public void handleRead(ChannelHandlerContext ctx, NatProxyProtos.Packet packet) {
         Channel proxyChannel = ctx.channel();
+
         if (!(proxyChannel.isActive() && proxyChannel.isWritable())) {
             LOGGER.error("Message dropped.");
             return;
@@ -40,15 +39,15 @@ public class ServerTunnelTransferHandler extends Handler {
         }
 
 
-        TransferResp resp = (TransferResp) message.getBody();
-        byte[] data = resp.getContent();
+        NatProxyProtos.TransferResponse response = packet.getTransferResponse();
+        byte[] data = response.getContent().toByteArray();
         ByteBuf buf = Unpooled.buffer(data.length);
         buf.writeBytes(data);
 
         if (userChannel instanceof NioDatagramChannel) {
-            InetSocketAddress inetSocketAddress = resp.getRemoteAddress();
-            DatagramPacket packet = new DatagramPacket(buf, inetSocketAddress);
-            userChannel.writeAndFlush(packet);
+            InetSocketAddress inetSocketAddress = new InetSocketAddress(response.getRemoteAddressHost(), response.getRemoteAddressPort());
+            DatagramPacket datagramPacket = new DatagramPacket(buf, inetSocketAddress);
+            userChannel.writeAndFlush(datagramPacket);
         } else if (userChannel instanceof NioSocketChannel) {
             userChannel.writeAndFlush(buf);
         } else {
@@ -74,7 +73,7 @@ public class ServerTunnelTransferHandler extends Handler {
     }
 
     @Override
-    public byte getMessageType() {
-        return MessageType.TRANSFER_RESPONSE;
+    public NatProxyProtos.Header.MessageType getMessageType() {
+        return NatProxyProtos.Header.MessageType.TRANSFER_RESPONSE;
     }
 }

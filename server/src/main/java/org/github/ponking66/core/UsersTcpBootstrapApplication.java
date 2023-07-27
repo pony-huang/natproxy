@@ -6,7 +6,7 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import org.github.ponking66.common.Proxy;
 import org.github.ponking66.handler.UserTcpChannelHandler;
-import org.github.ponking66.protoctl.ProtocType;
+import org.github.ponking66.proto3.ProtocType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

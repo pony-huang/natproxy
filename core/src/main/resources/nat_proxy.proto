@@ -1,0 +1,90 @@
+syntax = "proto3";
+
+package natproxy;
+
+option java_package = "org.github.ponking66.proto3";
+option java_outer_classname = "NatProxyProtos";
+
+message Header {
+  uint64 sessionId = 1;
+  MessageType type = 2;
+  uint32 version = 3;
+  Status status = 4;
+  enum MessageType{
+    LOGIN_REQUEST = 0;
+    LOGIN_RESPONSE = 1;
+    HEARTBEAT_REQUEST = 2;
+    HEARTBEAT_RESPONSE = 3;
+    CONNECT_RESPONSE = 4;
+    CONNECT_REQUEST = 5;
+    DISCONNECT = 6;
+    DISCONNECT_PROXY_TUNNEL = 7;
+    TRANSFER_REQUEST = 8;
+    TRANSFER_RESPONSE = 9;
+  }
+
+  enum Status{
+    FAILED = 0;
+    SUCCESS = 1;
+  }
+
+}
+
+message Packet {
+  Header header = 1;
+  optional TransferRequest transferRequest = 2;
+  optional TransferResponse transferResponse = 3;
+  optional ProxyTunnelInfoRequest proxyTunnelInfoRequest = 4;
+  optional ProxyTunnelInfoResponse proxyTunnelInfoResponse = 5;
+  optional LoginRequest loginRequest = 6;
+  optional LoginResponse loginResponse = 7;
+  optional CloseChannelRequest closeChannelRequest = 8;
+}
+
+message TransferRequest {
+  string userId = 1;
+  uint32 remoteAddressPort = 2;
+  string remoteAddressHost = 3;
+  bytes content = 4;
+}
+
+message TransferResponse {
+  string userId = 1;
+  uint32 remoteAddressPort = 2;
+  string remoteAddressHost = 3;
+  bytes content = 4;
+}
+
+message ProxyTunnelInfoRequest {
+  string userId = 1;
+  string host = 2;
+  uint32 port = 3;
+  string token = 4;
+  string type = 5;
+}
+
+message ProxyTunnelInfoResponse {
+  string userId = 1;
+  string host = 2;
+  uint32 port = 3;
+  string token = 4;
+}
+
+message LoginRequest {
+  string clientKey = 1;
+}
+
+message LoginResponse {
+  string userId = 1;
+  ResponseError error = 2;
+  enum ResponseError{
+    SUCCESS = 0;
+    LOGGED = 1;
+    CLIENT_KEY_ERROR = 2;
+  }
+}
+
+message CloseChannelRequest {
+  string userId = 1;
+  string token = 2;
+}

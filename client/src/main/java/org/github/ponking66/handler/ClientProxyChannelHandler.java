@@ -11,22 +11,12 @@ import org.github.ponking66.core.ClientChannelManager;
  * @author pony
  * @date 2023/5/31
  */
-public class ClientCenterHandler extends ChannelInboundHandlerAdapter {
+public class ClientProxyChannelHandler extends ChannelInboundHandlerAdapter {
 
     private final Application clientApplication;
 
-    public ClientCenterHandler(Application clientApplication) {
+    public ClientProxyChannelHandler(Application clientApplication) {
         this.clientApplication = clientApplication;
-    }
-
-    @Override
-    public void channelActive(ChannelHandlerContext ctx) throws Exception {
-        super.channelActive(ctx);
-    }
-
-    @Override
-    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        super.channelRead(ctx, msg);
     }
 
     /**

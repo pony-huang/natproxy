@@ -7,8 +7,8 @@ import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelOption;
 import org.github.ponking66.common.AttrConstants;
 import org.github.ponking66.common.ProxyConfig;
-import org.github.ponking66.protoctl.NettyMessage;
-import org.github.ponking66.util.RequestResponseUtils;
+import org.github.ponking66.proto3.NatProxyProtos;
+import org.github.ponking66.proto3.ProtoRequestResponseHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,7 +43,7 @@ public class TargetServerChannelFutureListener implements ChannelFutureListener 
             bind(targetServerChannel, cmdChannel);
         } else {
             // 初始登录失败通知代理服务器关闭对应关系channel
-            cmdChannel.writeAndFlush(RequestResponseUtils.disconnect(null));
+            cmdChannel.writeAndFlush(ProtoRequestResponseHelper.disconnect(null));
         }
     }
 
@@ -60,7 +60,7 @@ public class TargetServerChannelFutureListener implements ChannelFutureListener 
                     } else {
                         LOGGER.warn("Failed to connect proxy server, cause: ", future.cause());
                         // 通知代理服务器关闭此代理服务（关闭端口监听）
-                        NettyMessage nettyMessage = RequestResponseUtils.disconnect(userId);
+                        NatProxyProtos.Packet nettyMessage = ProtoRequestResponseHelper.disconnect(userId);
                         proxyServerChannel.writeAndFlush(nettyMessage);
                         cmdChannel.writeAndFlush(nettyMessage);
                     }
@@ -69,7 +69,7 @@ public class TargetServerChannelFutureListener implements ChannelFutureListener 
 
     private Consumer<Channel> connectFailed(Channel cmdChannel) {
         return channel -> {
-            cmdChannel.writeAndFlush(RequestResponseUtils.disconnect(userId));
+            cmdChannel.writeAndFlush(ProtoRequestResponseHelper.disconnect(userId));
         };
     }
 
@@ -80,7 +80,7 @@ public class TargetServerChannelFutureListener implements ChannelFutureListener 
             proxyServerChannel.attr(AttrConstants.BIND_CHANNEL).set(targetServerChannel);
             targetServerChannel.attr(AttrConstants.BIND_CHANNEL).set(proxyServerChannel);
             // 通知代理服务器,代理隧道已经打通
-            proxyServerChannel.writeAndFlush(RequestResponseUtils.proxyTunnelInfoResp(userId));
+            proxyServerChannel.writeAndFlush(ProtoRequestResponseHelper.proxyTunnelInfoResponse(userId));
             // 重新注册和目标服务器通道的读事件,可以进行数据代理传输
             targetServerChannel.config().setOption(ChannelOption.AUTO_READ, true);
             // 建立绑定关系，唯一标示缓存通道

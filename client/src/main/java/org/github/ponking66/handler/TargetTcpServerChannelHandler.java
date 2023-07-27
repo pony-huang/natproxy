@@ -6,11 +6,7 @@ import io.netty.channel.ChannelHandlerContext;
 import org.github.ponking66.common.AttrConstants;
 import org.github.ponking66.common.ProxyConfig;
 import org.github.ponking66.core.ClientChannelManager;
-import org.github.ponking66.pojo.CloseChannelRep;
-import org.github.ponking66.protoctl.Header;
-import org.github.ponking66.protoctl.MessageType;
-import org.github.ponking66.protoctl.NettyMessage;
-import org.github.ponking66.util.RequestResponseUtils;
+import org.github.ponking66.proto3.ProtoRequestResponseHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,9 +43,9 @@ public class TargetTcpServerChannelHandler extends AbstractTargetServerChannelHa
         byte[] data = new byte[msg.readableBytes()];
         msg.readBytes(data);
         String userId = ClientChannelManager.getTargetServerChannelUserId(targetServerChannel);
-        NettyMessage message = RequestResponseUtils.transferResp(data, userId);
-        proxyServerChannel.writeAndFlush(message);
-        LOGGER.debug("TCP proxy, write data to proxy server, {} ---> {}", targetServerChannel.remoteAddress(), proxyServerChannel.remoteAddress());
+
+        proxyServerChannel.writeAndFlush(ProtoRequestResponseHelper.transferResponse(data, userId));
+        LOGGER.debug("Write data to proxy server[TCP]. {} -->> {}", targetServerChannel.remoteAddress(), proxyServerChannel.remoteAddress());
     }
 
     /**
@@ -63,15 +59,11 @@ public class TargetTcpServerChannelHandler extends AbstractTargetServerChannelHa
         ClientChannelManager.removeTargetServerChannel(userId);
         Channel proxyServerChannel = targetServerChannel.attr(AttrConstants.BIND_CHANNEL).get();
         if (proxyServerChannel != null) {
-            LOGGER.debug("TargetServerChannel disconnect, {}", targetServerChannel);
-            NettyMessage message = new NettyMessage();
-            message.setHeader(new Header().setType(MessageType.DISCONNECT));
-            CloseChannelRep rep = new CloseChannelRep(userId, ProxyConfig.client().getKey());
+            LOGGER.info("TargetServerChannel is disconnect. {}", targetServerChannel);
             // 通知服务器端关闭指定服务
-            proxyServerChannel.writeAndFlush(rep);
+            proxyServerChannel.writeAndFlush(ProtoRequestResponseHelper.disconnect(userId,ProxyConfig.client().getKey()));
         }
         super.channelInactive(ctx);
     }
-
 
 }

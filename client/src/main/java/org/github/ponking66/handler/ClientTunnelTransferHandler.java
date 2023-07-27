@@ -10,9 +10,9 @@ import io.netty.channel.socket.nio.NioDatagramChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import org.github.ponking66.common.AttrConstants;
 import org.github.ponking66.core.ClientChannelManager;
-import org.github.ponking66.pojo.TransferRep;
-import org.github.ponking66.protoctl.MessageType;
-import org.github.ponking66.protoctl.NettyMessage;
+import org.github.ponking66.proto3.NatProxyProtos;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
 
@@ -20,32 +20,36 @@ import java.net.InetSocketAddress;
  * @author pony
  * @date 2023/5/18
  */
-public class ClientTunnelTransferHandler extends Handler {
+public class ClientTunnelTransferHandler extends ProtoHandler {
+
+    protected final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
 
     @Override
-    public void handleRead(ChannelHandlerContext ctx, NettyMessage message) {
+    public void handleRead(ChannelHandlerContext ctx, NatProxyProtos.Packet packet) {
         Channel targetServerChannel = ctx.channel().attr(AttrConstants.BIND_CHANNEL).get();
         if (targetServerChannel == null) {
             LOGGER.warn("TargetServerChannel is null");
             return;
         }
 
-        TransferRep rep = (TransferRep) message.getBody();
+        NatProxyProtos.TransferRequest request = packet.getTransferRequest();
+
         if (targetServerChannel instanceof NioDatagramChannel) {
 
-            byte[] data = rep.getContent();
+            byte[] data = request.getContent().toByteArray();
             ByteBuf buf = Unpooled.buffer(data.length);
             buf.writeBytes(data);
-            InetSocketAddress proxySeverRemoteAddress = rep.getRemoteAddress();
+
+            InetSocketAddress proxySeverRemoteAddress =  new InetSocketAddress(request.getRemoteAddressHost(),request.getRemoteAddressPort());
             InetSocketAddress targetSeverLocalAddress = (InetSocketAddress) targetServerChannel.remoteAddress();
             ClientChannelManager.bindMappedAddress(targetSeverLocalAddress, proxySeverRemoteAddress);
-            DatagramPacket packet = new DatagramPacket(buf, targetSeverLocalAddress);
-            targetServerChannel.writeAndFlush(packet);
+            targetServerChannel.writeAndFlush(new DatagramPacket(buf, targetSeverLocalAddress));
+
             LOGGER.debug("Write data to target server, {}", targetServerChannel);
 
         } else if (targetServerChannel instanceof NioSocketChannel) {
 
-            byte[] data = rep.getContent();
+            byte[] data = request.getContent().toByteArray();
             ByteBuf buf = Unpooled.buffer(data.length);
             buf.writeBytes(data);
             targetServerChannel.writeAndFlush(buf);
@@ -73,7 +77,7 @@ public class ClientTunnelTransferHandler extends Handler {
     }
 
     @Override
-    public byte getMessageType() {
-        return MessageType.TRANSFER_REQUEST;
+    public NatProxyProtos.Header.MessageType getMessageType() {
+        return NatProxyProtos.Header.MessageType.TRANSFER_REQUEST;
     }
 }

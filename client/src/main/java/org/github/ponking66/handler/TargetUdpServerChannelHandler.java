@@ -5,8 +5,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.socket.DatagramPacket;
 import org.github.ponking66.common.AttrConstants;
 import org.github.ponking66.core.ClientChannelManager;
-import org.github.ponking66.protoctl.NettyMessage;
-import org.github.ponking66.util.RequestResponseUtils;
+import org.github.ponking66.proto3.ProtoRequestResponseHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,7 +20,6 @@ import java.net.InetSocketAddress;
  */
 public class TargetUdpServerChannelHandler extends AbstractTargetServerChannelHandler<DatagramPacket> {
 
-    protected final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
 
     /**
      * 读取目标服务器的消息，写给代理服务器
@@ -47,10 +45,8 @@ public class TargetUdpServerChannelHandler extends AbstractTargetServerChannelHa
         InetSocketAddress inetSocketAddress = ClientChannelManager.getMappedAddressProxySeverUserRemoteAddress(sender);
         String userId = ClientChannelManager.getTargetServerChannelUserId(targetServerChannel);
 
-        NettyMessage message = RequestResponseUtils.transferResp(bytes, userId, inetSocketAddress);
-
-        proxyServerChannel.writeAndFlush(message);
-        LOGGER.debug("UDP proxy, write data to proxy server, {} ---> {}", targetServerChannel.remoteAddress(), proxyServerChannel.remoteAddress());
+        proxyServerChannel.writeAndFlush(ProtoRequestResponseHelper.transferResponse(bytes, userId, inetSocketAddress));
+        LOGGER.debug("Write data to proxy server[UDP]. {} -->> {}", targetServerChannel.remoteAddress(), proxyServerChannel.remoteAddress());
     }
 
 
