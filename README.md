@@ -64,4 +64,4 @@ server:
 
 # 致谢
 
-特别感[p2p-nat](https://gitee.com/TANGMONK-MEAT/p2p-nat)参考与启发
+特别感谢 [p2p-nat](https://gitee.com/TANGMONK-MEAT/p2p-nat) 参考与启发
