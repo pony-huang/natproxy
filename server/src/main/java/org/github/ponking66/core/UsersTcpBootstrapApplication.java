@@ -4,11 +4,12 @@ import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.github.ponking66.common.Proxy;
 import org.github.ponking66.handler.UserTcpChannelHandler;
 import org.github.ponking66.protoctl.ProtocType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -19,7 +20,7 @@ import java.util.stream.Collectors;
  */
 public class UsersTcpBootstrapApplication extends UserApplication {
 
-    protected static final Logger LOGGER = LoggerFactory.getLogger(UsersTcpBootstrapApplication.class);
+    private static final Logger LOGGER = LogManager.getLogger();
     private final ServerBootstrap serverBootstrap;
 
     public UsersTcpBootstrapApplication(EventLoopGroup bossGroup, EventLoopGroup workerGroup) {

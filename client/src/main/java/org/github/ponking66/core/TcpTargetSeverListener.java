@@ -10,11 +10,12 @@ import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.traffic.GlobalTrafficShapingHandler;
 import io.netty.handler.traffic.TrafficCounter;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.github.ponking66.handler.TargetTcpServerChannelHandler;
 import org.github.ponking66.pojo.ProxyTunnelInfoReq;
 import org.github.ponking66.protoctl.NettyMessage;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 
 import java.util.concurrent.TimeUnit;
 
@@ -25,7 +26,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class TcpTargetSeverListener implements TargetServerListener {
 
-    protected static final Logger LOGGER = LoggerFactory.getLogger(TcpTargetSeverListener.class);
+    private static final Logger LOGGER = LogManager.getLogger();
 
     /**
      * 代理客户端目标服务器的启动器

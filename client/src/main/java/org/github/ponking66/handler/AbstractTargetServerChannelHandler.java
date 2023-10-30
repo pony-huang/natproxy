@@ -4,9 +4,10 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.SimpleChannelInboundHandler;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.github.ponking66.common.AttrConstants;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 
 
 /**
@@ -17,7 +18,7 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class AbstractTargetServerChannelHandler<T> extends SimpleChannelInboundHandler<T> {
 
-    protected final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
+    private static final Logger LOGGER = LogManager.getLogger();
 
     /**
      * 平衡读写速度

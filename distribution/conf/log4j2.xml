@@ -1,0 +1,30 @@
+<Configuration status="WARN" monitorInterval="300">
+    <properties>error.log
+        <property name="LOG_HOME">${sys:user.home}/logs/</property>
+        <property name="FILE_NAME">${log.filename}</property>
+    </properties>
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="%highlight{%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n}{FATAL=red blink, ERROR=red, WARN=yellow bold, INFO=green, DEBUG=blue bold, TRACE=white}" />
+        </Console>
+        <RollingRandomAccessFile name="RollingRandomAccessFile"
+                                 fileName="${LOG_HOME}/${FILE_NAME}"
+                                 filePattern="${LOG_HOME}/$${date:yyyy-MM}/${FILE_NAME}-%d{yyyy-MM-dd HH-mm}-%i">
+            <PatternLayout pattern="%p - %d{yyyy-MM-dd HH:mm:ss} - %t - %c{1.} - %m%n" />
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" />
+                <SizeBasedTriggeringPolicy size="10 MB" />
+            </Policies>
+            <DefaultRolloverStrategy max="20" />
+        </RollingRandomAccessFile>
+    </Appenders>
+
+    <Loggers>
+        <Logger name="org.github.ponking66" level="debug"/>
+        <root level="all">
+            <appender-ref ref="Console"/>
+            <appender-ref ref="RollingRandomAccessFile"/>
+        </root>
+    </Loggers>
+
+</Configuration>

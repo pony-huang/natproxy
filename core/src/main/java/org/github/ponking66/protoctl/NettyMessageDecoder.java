@@ -3,9 +3,9 @@ package org.github.ponking66.protoctl;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.github.ponking66.util.MarshallerUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * @author pony
@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
  */
 public class NettyMessageDecoder extends LengthFieldBasedFrameDecoder {
 
-    private final Logger LOGGER = LoggerFactory.getLogger(NettyMessageDecoder.class);
+        private static final Logger LOGGER = LogManager.getLogger();
 
     public NettyMessageDecoder() {
         this(1024 * 1024 * 4, 4, 4, -8, 0);

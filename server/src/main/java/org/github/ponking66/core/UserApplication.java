@@ -2,8 +2,9 @@ package org.github.ponking66.core;
 
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 
 import java.net.BindException;
 import java.util.List;
@@ -15,7 +16,7 @@ import java.util.concurrent.ExecutionException;
  */
 public abstract class UserApplication {
 
-    protected final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
+    private static final Logger LOGGER = LogManager.getLogger();
 
     /**
      * 启动器进行绑定 AbstractBootstrap.bind();
