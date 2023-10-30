@@ -3,11 +3,13 @@ package org.github.ponking66.common;
 
 import lombok.Data;
 import lombok.ToString;
-import org.github.ponking66.util.ObjectUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.github.ponking66.util.ResourceUtils;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
@@ -25,6 +27,8 @@ public class ConfigInfo {
 
     private static volatile ConfigInfo CONFIG_INFO = null;
 
+    private static final Logger LOGGER = LogManager.getLogger();
+
     private ConfigInfo() {
     }
 
@@ -34,16 +38,10 @@ public class ConfigInfo {
                 if (CONFIG_INFO == null) {
                     Constructor constructor = new Constructor(ConfigInfo.class);
                     Yaml yaml = new Yaml(constructor);
-                    InputStream is;
-                    String path = System.getProperty(ProxyConfig.ENV_PROPERTIES_PATH);
-                    if (!ObjectUtils.isEmpty(path)) {
-                        is = new FileInputStream(path);
-                    } else if (!ObjectUtils.isEmpty(System.getProperty(ProxyConfig.ENV_PROPERTIES_CONFIG_FILE_NAME))) {
-                        String filename = System.getProperty(ProxyConfig.ENV_PROPERTIES_CONFIG_FILE_NAME);
-                        is = ResourceUtils.getResourceAsStream(filename);
-                    } else {
-                        is = ResourceUtils.getResourceAsStream(ProxyConfig.ENV_PROPERTIES_GLOBAL_CONFIG_FILE_NAME);
-                    }
+                    String filePath = System.getProperty(ProxyConfig.ENV_PROPERTIES_CONFIG_FILE_NAME);
+                    InputStream is = new FileInputStream(new File(filePath));
+                    // 本地运行
+//                  InputStream is = ResourceUtils.getResourceAsStream(ProxyConfig.CONFIG_FILENAME);
                     CONFIG_INFO = yaml.load(is);
                     return CONFIG_INFO;
                 }

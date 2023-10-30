@@ -55,11 +55,6 @@ public class ClientApplication implements Application {
 
     private final AtomicInteger errorTimes = new AtomicInteger(0);
 
-    static {
-        System.setProperty(ProxyConfig.ENV_PROPERTIES_CONFIG_FILE_NAME, ProxyConfig.CLIENT_CONFIG_FILENAME);
-        System.setProperty(ProxyConfig.ENV_PROPERTIES_LOG_FILE_NAME, ProxyConfig.CLIENT_FILE_LOG);
-    }
-
     public static void main(String[] args) throws InterruptedException {
         new ClientApplication(ProxyConfig.getServerHost(), isTlsEnable(ProxyConfig.client().getTls()) ? ProxyConfig.client().getTls().getPort() : ProxyConfig.getServerPort()).start();
     }
@@ -69,7 +64,6 @@ public class ClientApplication implements Application {
         this.host = host;
 
         workerGroup = new NioEventLoopGroup();
-
         proxyServerBootstrap.group(workerGroup)
                 .channel(NioSocketChannel.class)
                 .handler(new LoggingHandler(LogLevel.INFO))

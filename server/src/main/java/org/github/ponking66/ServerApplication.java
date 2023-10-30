@@ -37,11 +37,6 @@ public class ServerApplication implements Application {
 
     private static final Logger LOGGER = LogManager.getLogger();
 
-    static {
-        System.setProperty(ProxyConfig.ENV_PROPERTIES_CONFIG_FILE_NAME, ProxyConfig.SERVER_CONFIG_FILENAME);
-        System.setProperty(ProxyConfig.ENV_PROPERTIES_LOG_FILE_NAME, ProxyConfig.SERVER_FILE_LOG);
-    }
-
     private final EventLoopGroup bossGroup = new NioEventLoopGroup();
     private final EventLoopGroup workerGroup = new NioEventLoopGroup();
 
@@ -67,7 +62,7 @@ public class ServerApplication implements Application {
         }
     }
 
-    private void initBootstrapServer() throws IOException, InterruptedException, ExecutionException {
+    private void initBootstrapServer() throws InterruptedException, ExecutionException {
         ServerBootstrap bootstrap = new ServerBootstrap();
         bootstrap.group(bossGroup, workerGroup).channel(NioServerSocketChannel.class)
                 .childOption(ChannelOption.WRITE_BUFFER_WATER_MARK, new WriteBufferWaterMark(8 * 1024, 32 * 1024))

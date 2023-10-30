@@ -1,7 +1,7 @@
 <Configuration status="WARN" monitorInterval="300">
     <properties>
         <property name="LOG_HOME">./logs/</property>
-        <property name="FILE_NAME">client.log</property>
+        <property name="FILE_NAME">${natproxy:log.filename}</property>
     </properties>
     <Appenders>
         <Console name="Console" target="SYSTEM_OUT">
@@ -21,7 +21,7 @@
 
     <Loggers>
         <Logger name="org.github.ponking66" level="debug"/>
-        <root level="INFO">
+        <root level="debug">
             <appender-ref ref="Console"/>
             <appender-ref ref="RollingRandomAccessFile"/>
         </root>

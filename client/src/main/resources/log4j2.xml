@@ -1,7 +1,7 @@
 <Configuration status="WARN" monitorInterval="300">
     <properties>
         <property name="LOG_HOME">./logs/</property>
-        <property name="FILE_NAME">client.log</property>
+        <property name="FILE_NAME">${natproxy:log.filename}</property>
     </properties>
     <Appenders>
         <Console name="Console" target="SYSTEM_OUT">
@@ -9,7 +9,7 @@
         </Console>
         <RollingRandomAccessFile name="RollingRandomAccessFile"
                                  fileName="${LOG_HOME}/${FILE_NAME}"
-                                 filePattern="${LOG_HOME}/$${date:yyyy-MM}/${FILE_NAME}-%d{yyyy-MM-dd HH-mm}-%i">
+                                 filePattern="${LOG_HOME}/${date:yyyy-MM}/${FILE_NAME}-%d{yyyy-MM-dd HH-mm}-%i">
             <PatternLayout pattern="%p - %d{yyyy-MM-dd HH:mm:ss} - %t - %c{1.} - %m%n" />
             <Policies>
                 <TimeBasedTriggeringPolicy interval="1" />
