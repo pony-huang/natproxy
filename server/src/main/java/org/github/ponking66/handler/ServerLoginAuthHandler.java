@@ -5,7 +5,7 @@ import io.netty.channel.ChannelHandlerContext;
 import org.github.ponking66.core.ProxyChannelManager;
 import org.github.ponking66.core.ProxyChannelManagerFactory;
 import org.github.ponking66.core.UserApplication;
-import org.github.ponking66.pojo.LoginRep;
+import org.github.ponking66.pojo.LoginReq;
 import org.github.ponking66.pojo.LoginResp;
 import org.github.ponking66.protoctl.Header;
 import org.github.ponking66.protoctl.MessageType;
@@ -30,7 +30,7 @@ public class ServerLoginAuthHandler extends Handler {
 
     @Override
     public void handleRead(ChannelHandlerContext ctx, NettyMessage message) {
-        if (message.getBody() instanceof LoginRep rep) {
+        if (message.getBody() instanceof LoginReq rep) {
             String clientKey = rep.getClientKey();
             if (!ProxyChannelManagerFactory.getProxyChannelManager().containsKey(clientKey)) {
                 LOGGER.info("Authentication failure");

@@ -8,7 +8,7 @@ import org.apache.logging.log4j.Logger;
 import org.github.ponking66.common.AttrConstants;
 import org.github.ponking66.common.ProxyConfig;
 import org.github.ponking66.core.ClientChannelManager;
-import org.github.ponking66.pojo.CloseChannelRep;
+import org.github.ponking66.pojo.CloseChannelReq;
 import org.github.ponking66.protoctl.Header;
 import org.github.ponking66.protoctl.MessageType;
 import org.github.ponking66.protoctl.NettyMessage;
@@ -67,7 +67,7 @@ public class TargetTcpServerChannelHandler extends AbstractTargetServerChannelHa
             LOGGER.debug("TargetServerChannel disconnect, {}", targetServerChannel);
             NettyMessage message = new NettyMessage();
             message.setHeader(new Header().setType(MessageType.DISCONNECT));
-            CloseChannelRep rep = new CloseChannelRep(userId, ProxyConfig.client().getKey());
+            CloseChannelReq rep = new CloseChannelReq(userId, ProxyConfig.client().getKey());
             // 通知服务器端关闭指定服务
             proxyServerChannel.writeAndFlush(rep);
         }

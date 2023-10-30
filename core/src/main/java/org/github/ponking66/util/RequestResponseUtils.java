@@ -37,7 +37,7 @@ public class RequestResponseUtils {
     public static NettyMessage transferRep(byte[] data, String userId) {
         NettyMessage proxyMessage = new NettyMessage();
         proxyMessage.setHeader(new Header().setType(MessageType.TRANSFER_REQUEST));
-        TransferRep rep = new TransferRep(userId, data);
+        TransferReq rep = new TransferReq(userId, data);
         proxyMessage.setBody(rep);
         return proxyMessage;
     }
@@ -45,7 +45,7 @@ public class RequestResponseUtils {
     public static NettyMessage transferRep(byte[] bytes, String userId, InetSocketAddress sender) {
         NettyMessage proxyMessage = new NettyMessage();
         proxyMessage.setHeader(new Header().setType(MessageType.TRANSFER_REQUEST));
-        TransferRep rep = new TransferRep(userId, bytes);
+        TransferReq rep = new TransferReq(userId, bytes);
         rep.setRemoteAddress(sender);
         proxyMessage.setBody(rep);
         return proxyMessage;
@@ -74,7 +74,7 @@ public class RequestResponseUtils {
     public static NettyMessage loginRep(String key) {
         NettyMessage message = new NettyMessage();
         message.setHeader(new Header().setType(MessageType.LOGIN_REQUEST));
-        message.setBody(new LoginRep(key));
+        message.setBody(new LoginReq(key));
         return message;
     }
 
@@ -91,7 +91,7 @@ public class RequestResponseUtils {
         Header header = new Header();
         header.setType(MessageType.DISCONNECT);
         message.setHeader(header);
-        message.setBody(new CloseChannelRep(userId, null));
+        message.setBody(new CloseChannelReq(userId, null));
         return message;
     }
 

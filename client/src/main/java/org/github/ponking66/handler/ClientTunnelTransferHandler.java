@@ -10,7 +10,7 @@ import io.netty.channel.socket.nio.NioDatagramChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import org.github.ponking66.common.AttrConstants;
 import org.github.ponking66.core.ClientChannelManager;
-import org.github.ponking66.pojo.TransferRep;
+import org.github.ponking66.pojo.TransferReq;
 import org.github.ponking66.protoctl.MessageType;
 import org.github.ponking66.protoctl.NettyMessage;
 
@@ -30,7 +30,7 @@ public class ClientTunnelTransferHandler extends Handler {
             return;
         }
 
-        TransferRep rep = (TransferRep) message.getBody();
+        TransferReq rep = (TransferReq) message.getBody();
         if (targetServerChannel instanceof NioDatagramChannel) {
 
             byte[] data = rep.getContent();

@@ -6,7 +6,7 @@ import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import org.github.ponking66.common.AttrConstants;
 import org.github.ponking66.core.ProxyChannelManager;
-import org.github.ponking66.pojo.CloseChannelRep;
+import org.github.ponking66.pojo.CloseChannelReq;
 import org.github.ponking66.protoctl.MessageType;
 import org.github.ponking66.protoctl.NettyMessage;
 
@@ -28,7 +28,7 @@ public class ServerDisconnectHandler extends Handler {
         // 代理连接没有连上服务器，由cmdChannel通知用户断开连接
         if (clientKey == null) {
             LOGGER.warn("ClientKey is null");
-            if (msg.getBody() instanceof CloseChannelRep rep) {
+            if (msg.getBody() instanceof CloseChannelReq rep) {
                 String userId = rep.getUserId();
                 Optional.of(rep.getUserId()).ifPresent(data -> {
                     Channel userChannel = ProxyChannelManager.removeUserChannelFromCmdChannel(currentChannel, userId);
