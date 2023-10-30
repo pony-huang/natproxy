@@ -1,7 +1,7 @@
 <Configuration status="WARN" monitorInterval="300">
     <properties>
-        <property name="LOG_HOME">${sys:user.home}/logs/</property>
-        <property name="FILE_NAME">${log.filename}</property>
+        <property name="LOG_HOME">./logs/</property>
+        <property name="FILE_NAME">client.log</property>
     </properties>
     <Appenders>
         <Console name="Console" target="SYSTEM_OUT">
