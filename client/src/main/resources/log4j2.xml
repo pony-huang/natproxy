@@ -21,7 +21,7 @@
 
     <Loggers>
         <Logger name="org.github.ponking66" level="debug"/>
-        <root level="info">
+        <root level="debug">
             <appender-ref ref="Console"/>
             <appender-ref ref="RollingRandomAccessFile"/>
         </root>
