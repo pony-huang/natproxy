@@ -12,6 +12,7 @@ import io.netty.handler.ssl.SslHandler;
 import io.netty.handler.timeout.IdleStateHandler;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.github.ponking66.common.ProxyConfig;
 import org.github.ponking66.common.TLSConfig;
 import org.github.ponking66.core.UserApplication;
@@ -25,6 +26,7 @@ import org.github.ponking66.util.ObjectUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.security.Security;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -41,6 +43,10 @@ public class ServerApplication implements Application {
     private final EventLoopGroup workerGroup = new NioEventLoopGroup();
 
     private final List<UserApplication> userApplications;
+
+    static {
+        Security.addProvider(new BouncyCastleProvider());
+    }
 
     public static void main(String[] args) throws Exception {
         new ServerApplication().start();
@@ -65,49 +71,49 @@ public class ServerApplication implements Application {
     private void initBootstrapServer() throws InterruptedException, ExecutionException {
         ServerBootstrap bootstrap = new ServerBootstrap();
         bootstrap.group(bossGroup, workerGroup).channel(NioServerSocketChannel.class)
-                .childOption(ChannelOption.WRITE_BUFFER_WATER_MARK, new WriteBufferWaterMark(8 * 1024, 32 * 1024))
                 .childHandler(new ChannelInitializer<SocketChannel>() {
                     @Override
                     protected void initChannel(SocketChannel ch) throws Exception {
                         ChannelPipeline pipeline = ch.pipeline();
-                        initCommonHandlers(pipeline);
+                        pipeline.addLast(new NettyMessageDecoder());
+                        pipeline.addLast(new NettyMessageEncoder());
+                        pipeline.addLast(new IdleStateHandler(ProxyConfig.READER_IDLE_TIME_SECONDS, ProxyConfig.WRITER_IDLE_TIME_SECONDS, ProxyConfig.ALL_IDLE_TIME_SECONDS));
+                        pipeline.addLast(new ServerLoginAuthHandler(userApplications));
+                        pipeline.addLast(new ServerDisconnectHandler());
+                        pipeline.addLast(new ServerTunnelConnectHandler());
+                        pipeline.addLast(new ServerTunnelTransferHandler());
+                        pipeline.addLast(new HeartBeatServerHandler());
                     }
                 });
         bootstrap.bind(ProxyConfig.getServerPort()).get();
     }
 
     public void initSSLBootstrapServer(TLSConfig tls) throws InterruptedException, IOException, ExecutionException {
-
         File crt = new File(tls.getKeyCertChainFile());
         File key = new File(tls.getKeyFile());
         File ca = new File(tls.getCaFile());
-
-        SslContext sslContext = SslContextBuilder.forClient().keyManager(crt, key).trustManager(ca).clientAuth(ClientAuth.REQUIRE).build();
+        SslContext sslContext = SslContextBuilder.forServer(crt, key).trustManager(ca).clientAuth(ClientAuth.REQUIRE).build();
         ServerBootstrap bootstrap = new ServerBootstrap();
         bootstrap.group(bossGroup, workerGroup).channel(NioServerSocketChannel.class)
-                .childOption(ChannelOption.WRITE_BUFFER_WATER_MARK, new WriteBufferWaterMark(8 * 1024, 32 * 1024))
                 .childHandler(new ChannelInitializer<SocketChannel>() {
                     @Override
                     protected void initChannel(SocketChannel ch) throws Exception {
                         ChannelPipeline pipeline = ch.pipeline();
                         pipeline.addLast(new SslHandler(sslContext.newEngine(ch.alloc())));
-                        initCommonHandlers(pipeline);
+                        pipeline.addLast(new NettyMessageDecoder());
+                        pipeline.addLast(new NettyMessageEncoder());
+                        pipeline.addLast(new IdleStateHandler(ProxyConfig.READER_IDLE_TIME_SECONDS, ProxyConfig.WRITER_IDLE_TIME_SECONDS, ProxyConfig.ALL_IDLE_TIME_SECONDS));
+                        pipeline.addLast(new ServerLoginAuthHandler(userApplications));
+                        pipeline.addLast(new ServerDisconnectHandler());
+                        pipeline.addLast(new ServerTunnelConnectHandler());
+                        pipeline.addLast(new ServerTunnelTransferHandler());
+                        pipeline.addLast(new HeartBeatServerHandler());
                     }
                 });
 
         bootstrap.bind(tls.getPort()).get();
     }
 
-    private void initCommonHandlers(ChannelPipeline pipeline) throws IOException {
-        pipeline.addLast(new NettyMessageDecoder());
-        pipeline.addLast(new NettyMessageEncoder());
-        pipeline.addLast(new IdleStateHandler(ProxyConfig.READER_IDLE_TIME_SECONDS, ProxyConfig.WRITER_IDLE_TIME_SECONDS, ProxyConfig.ALL_IDLE_TIME_SECONDS));
-        pipeline.addLast(new ServerLoginAuthHandler(userApplications));
-        pipeline.addLast(new ServerDisconnectHandler());
-        pipeline.addLast(new ServerTunnelConnectHandler());
-        pipeline.addLast(new ServerTunnelTransferHandler());
-        pipeline.addLast(new HeartBeatServerHandler());
-    }
 
     @Override
     public void stop() throws Exception {

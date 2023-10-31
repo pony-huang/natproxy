@@ -1,9 +1,9 @@
 server:
   tls:
-    enable: false
-    keyCertChainFile: xxx.pem
-    keyFile: xxx.key
-    caFile: ca.pem
+    enable: true
+    keyCertChainFile: D:\WorkPlace\natproxy\distribution\ssl\server\server.crt
+    keyFile: D:\WorkPlace\natproxy\distribution\ssl\server\pkcs8_server.key
+    caFile: D:\WorkPlace\natproxy\distribution\ssl\server\ca.crt
     port: 20002
   host: 127.0.0.1
   port: 20001
