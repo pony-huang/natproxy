@@ -31,11 +31,11 @@ openssl pkcs8 -topk8 -in server.key -out pkcs8_server.key -nocrypt -passin pass:
 openssl pkcs8 -topk8 -in client.key -out pkcs8_client.key -nocrypt -passin pass:%CLIENT_KEY_PASS%
 
 if exist .\ssl\server\ (
-    for %%F in (server.*) do move "%%F" .\ssl\server\
+    for %%F in (*server.*) do move "%%F" .\ssl\server\
 )
 
 if exist .\ssl\client\ (
-    for %%F in (client.*) do move "%%F" .\ssl\client\
+    for %%F in (*client.*) do move "%%F" .\ssl\client\
 )
 
 move ca.crt .\ssl\

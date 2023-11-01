@@ -47,10 +47,10 @@
             </properties>
         </profile>
         <profile>
-            <id>unix</id>
+            <id>linux</id>
             <activation>
                 <os>
-                    <family>unix</family>
+                    <family>linux</family>
                 </os>
             </activation>
             <properties>
@@ -95,7 +95,8 @@
                         <platform>unix</platform>
                         <platform>windows</platform>
                     </platforms>
-                    <assembleDirectory>${project.parent.basedir}/${distribute.path}/${application.name}</assembleDirectory>
+                    <assembleDirectory>${project.parent.basedir}/${distribute.path}/${application.name}
+                    </assembleDirectory>
                     <repositoryName>lib</repositoryName>
                     <binFolder>bin</binFolder>
                     <configurationDirectory>conf</configurationDirectory>
@@ -107,17 +108,16 @@
 
                     <repositoryLayout>flat</repositoryLayout>
                     <encoding>UTF-8</encoding>
+                    <extraJvmArguments>-Xms128M -Xmx128M -Xss256k</extraJvmArguments>
                     <programs>
                         <program>
                             <mainClass>org.github.ponking66.ClientApplication</mainClass>
                             <id>client</id>
                             <jvmSettings>
                                 <extraArguments>
-                                    <extraArgument>-Xms128M</extraArgument>
-                                    <extraArgument>-Xmx128M</extraArgument>
-                                    <extraArgument>-Xss256k</extraArgument>
-                                    <extraArgument>-Dlog4j.configurationFile=$BASEDIR/conf/log4j2.xml</extraArgument>
-                                    <extraArgument>-Dnatproxy.configFilePath=$BASEDIR/conf/client_config.yaml</extraArgument>
+                                    <extraArgument>-Dlog4j.configurationFile=@BASEDIR@/conf/log4j2.xml</extraArgument>
+                                    <extraArgument>-Dnatproxy.configFilePath=@BASEDIR@/conf/client_config.yaml
+                                    </extraArgument>
                                 </extraArguments>
                             </jvmSettings>
                         </program>
@@ -126,11 +126,9 @@
                             <id>server</id>
                             <jvmSettings>
                                 <extraArguments>
-                                    <extraArgument>-Xms128M</extraArgument>
-                                    <extraArgument>-Xmx128M</extraArgument>
-                                    <extraArgument>-Xss256k</extraArgument>
-                                    <extraArgument>-Dlog4j.configurationFile=$BASEDIR/conf/log4j2.xml</extraArgument>
-                                    <extraArgument>-Dnatproxy.configFilePath=$BASEDIR/conf/server_config.yaml</extraArgument>
+                                    <extraArgument>-Dlog4j.configurationFile=@BASEDIR@/conf/log4j2.xml</extraArgument>
+                                    <extraArgument>-Dnatproxy.configFilePath=@BASEDIR@/conf/server_config.yaml
+                                    </extraArgument>
                                 </extraArguments>
                             </jvmSettings>
                         </program>
