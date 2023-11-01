@@ -5,7 +5,7 @@ client:
   key: 721b2e485683bd87c32f3c208f787a626c7397a759146a93be30e15ad3193084
   tls:
     enable: false
-    keyCertChainFile: ./conf/client.crt
-    keyFile: ./conf/pkcs8_client.key
+    keyCertChainFile: ./conf/ssl/client/client.crt
+    keyFile: ./conf/ssl/client/pkcs8_client.key
     caFile: ./conf/ca.crt
     port: 20002

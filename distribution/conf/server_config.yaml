@@ -1,9 +1,9 @@
 server:
   tls:
     enable: false
-    keyCertChainFile: ./conf/server.crt
-    keyFile: ./conf/pkcs8_server.key
-    caFile: ./conf/ca.crt
+    keyCertChainFile: ./conf/ssl/server/server.crt
+    keyFile: ./conf/ssl/server/pkcs8_server.key
+    caFile: ./conf/ssl/ca.crt
     port: 20002
   host: 127.0.0.1
   port: 20001

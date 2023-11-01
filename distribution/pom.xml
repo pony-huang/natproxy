@@ -34,9 +34,49 @@
 
     </dependencies>
 
+    <profiles>
+        <profile>
+            <id>windows</id>
+            <activation>
+                <os>
+                    <family>windows</family>
+                </os>
+            </activation>
+            <properties>
+                <execname>ssl_gen.bat</execname>
+            </properties>
+        </profile>
+        <profile>
+            <id>unix</id>
+            <activation>
+                <os>
+                    <family>unix</family>
+                </os>
+            </activation>
+            <properties>
+                <execname>ssl_gen.sh</execname>
+            </properties>
+        </profile>
+    </profiles>
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.1.0</version>
+                <executions>
+                    <execution>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>${project.basedir}/script/${execname}</executable>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>appassembler-maven-plugin</artifactId>
@@ -76,8 +116,8 @@
                                     <extraArgument>-Xms128M</extraArgument>
                                     <extraArgument>-Xmx128M</extraArgument>
                                     <extraArgument>-Xss256k</extraArgument>
-                                    <extraArgument>-Dlog4j.configurationFile=./conf/log4j2.xml</extraArgument>
-                                    <extraArgument>-Dnatproxy.configFilePath=./conf/client_config.yaml</extraArgument>
+                                    <extraArgument>-Dlog4j.configurationFile=$BASEDIR/conf/log4j2.xml</extraArgument>
+                                    <extraArgument>-Dnatproxy.configFilePath=$BASEDIR/conf/client_config.yaml</extraArgument>
                                 </extraArguments>
                             </jvmSettings>
                         </program>
@@ -89,8 +129,8 @@
                                     <extraArgument>-Xms128M</extraArgument>
                                     <extraArgument>-Xmx128M</extraArgument>
                                     <extraArgument>-Xss256k</extraArgument>
-                                    <extraArgument>-Dlog4j.configurationFile=./conf/log4j2.xml</extraArgument>
-                                    <extraArgument>-Dnatproxy.configFilePath=./conf/server_config.yaml</extraArgument>
+                                    <extraArgument>-Dlog4j.configurationFile=$BASEDIR/conf/log4j2.xml</extraArgument>
+                                    <extraArgument>-Dnatproxy.configFilePath=$BASEDIR/conf/server_config.yaml</extraArgument>
                                 </extraArguments>
                             </jvmSettings>
                         </program>
