@@ -3,12 +3,14 @@ package org.github.ponking66.handler;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.github.ponking66.common.AttrConstants;
 import org.github.ponking66.common.ProxyConfig;
 import org.github.ponking66.core.ClientChannelManager;
+import org.github.ponking66.util.RequestResponseUtils;
+
 import org.github.ponking66.proto3.ProtoRequestResponseHelper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 
 /**
@@ -19,7 +21,7 @@ import org.slf4j.LoggerFactory;
  */
 public class TargetTcpServerChannelHandler extends AbstractTargetServerChannelHandler<ByteBuf> {
 
-    protected final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
+    private static final Logger LOGGER = LogManager.getLogger();
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {

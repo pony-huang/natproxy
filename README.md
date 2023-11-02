@@ -1,8 +1,10 @@
-# 简介
-
-Natproxy是一个内网穿透工具，它能够将个人计算机或局域网中的服务器连接到公网，并同时支持 TCP/UDP 流量转发以及上层 TCP 协议，如 SSH、HTTP/HTTPS 等。
+# NAT PROXY Introduction
+Natproxy是一个内网穿透工具，可以使个人计算机或局域网上的服务器连接到公网上，且同时支持TCP/UDP流量转发以及其上层TCP协议（如`SSH`、`HTTP/HTTPS`...）。
 
 # 快速入门
+> main分支为自定义协议
+> 
+> **proto3协议需切换proto3分支**
 
 **下载与构建**
 
@@ -55,10 +57,10 @@ server:
       key: 721b2e485683bd87c32f3c208f787a626c7397a759146a93be30e15ad3193084
 ```
 
-# 项目代理模式
+# 代理原理
 
-编写中。。。
+![](./drawio.png)
 
 # 致谢
 
-特别感[p2p-nat](https://gitee.com/TANGMONK-MEAT/p2p-nat)参考与启发
+特别感谢 [p2p-nat](https://gitee.com/TANGMONK-MEAT/p2p-nat) 参考与启发

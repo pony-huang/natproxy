@@ -5,9 +5,10 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelOption;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.github.ponking66.common.AttrConstants;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 
 
 import java.net.InetSocketAddress;
@@ -27,7 +28,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  */
 public class ClientChannelManager {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ClientChannelManager.class);
+    private static final Logger LOGGER = LogManager.getLogger();
 
     /**
      * 和代理服务器的连接池的Channel的最大数量

@@ -5,6 +5,7 @@ import io.netty.channel.ChannelHandlerContext;
 import org.github.ponking66.core.ProxyChannelManager;
 import org.github.ponking66.core.ProxyChannelManagerFactory;
 import org.github.ponking66.core.UserApplication;
+import org.github.ponking66.util.RequestResponseUtils;
 import org.github.ponking66.proto3.NatProxyProtos;
 import org.github.ponking66.proto3.ProtoRequestResponseHelper;
 

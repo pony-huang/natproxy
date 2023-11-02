@@ -6,11 +6,11 @@ import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.socket.nio.NioDatagramChannel;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.github.ponking66.common.Proxy;
 import org.github.ponking66.handler.UserUdpChannelHandler;
 import org.github.ponking66.proto3.ProtocType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 
 import java.util.List;
@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
  */
 public class UsersUdpBootstrapApplication extends UserApplication {
 
-    protected final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
+    private static final Logger LOGGER = LogManager.getLogger();
 
     private final Bootstrap bootstrap;
 

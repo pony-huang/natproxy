@@ -2,12 +2,14 @@ package org.github.ponking66.handler;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.util.concurrent.ScheduledFuture;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.github.ponking66.Application;
 import org.github.ponking66.core.ClientChannelManager;
+import org.github.ponking66.util.RequestResponseUtils;
+
 import org.github.ponking66.proto3.NatProxyProtos;
 import org.github.ponking66.proto3.ProtoRequestResponseHelper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.TimeUnit;
 
@@ -17,7 +19,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class ClientLoginHandler extends ProtoHandler {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ClientLoginHandler.class);
+    private static final Logger LOGGER = LogManager.getLogger();
     private volatile ScheduledFuture<?> heartBeat;
     private final Application clientApplication;
 

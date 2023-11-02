@@ -6,8 +6,8 @@ import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import org.github.ponking66.common.AttrConstants;
 import org.github.ponking66.core.ProxyChannelManager;
-import org.github.ponking66.proto3.NatProxyProtos;
 
+import org.github.ponking66.proto3.NatProxyProtos;
 import java.util.Optional;
 
 /**

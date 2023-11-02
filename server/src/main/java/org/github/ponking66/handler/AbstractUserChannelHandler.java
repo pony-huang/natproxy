@@ -4,13 +4,13 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.SimpleChannelInboundHandler;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.github.ponking66.common.AttrConstants;
 import org.github.ponking66.common.ProxyConfig;
 import org.github.ponking66.core.ProxyChannelManager;
 import org.github.ponking66.pojo.ProxyTunnelInfoReq;
 import org.github.ponking66.proto3.ProtoRequestResponseHelper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
 
@@ -20,7 +20,7 @@ import java.net.InetSocketAddress;
  */
 public abstract class AbstractUserChannelHandler<T> extends SimpleChannelInboundHandler<T> {
 
-    private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
+    private static final Logger LOGGER = LogManager.getLogger();
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, T msg) throws Exception {

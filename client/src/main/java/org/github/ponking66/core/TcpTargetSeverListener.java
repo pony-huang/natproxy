@@ -2,6 +2,7 @@ package org.github.ponking66.core;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.DefaultEventLoop;
 import io.netty.channel.socket.SocketChannel;
@@ -10,11 +11,9 @@ import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.traffic.GlobalTrafficShapingHandler;
 import io.netty.handler.traffic.TrafficCounter;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.github.ponking66.handler.TargetTcpServerChannelHandler;
-import org.github.ponking66.pojo.ProxyTunnelInfoReq;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.concurrent.TimeUnit;
 
 
@@ -24,7 +23,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class TcpTargetSeverListener implements TargetServerListener {
 
-    protected static final Logger LOGGER = LoggerFactory.getLogger(TcpTargetSeverListener.class);
+    private static final Logger LOGGER = LogManager.getLogger();
 
     /**
      * 代理客户端目标服务器的启动器
@@ -36,44 +35,35 @@ public class TcpTargetSeverListener implements TargetServerListener {
      */
     protected final Bootstrap proxyServerBootstrap;
 
-    private static final GlobalTrafficShapingHandler trafficHandler = new GlobalTrafficShapingHandler(new DefaultEventLoop());
 
-    static {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                while (true) {
-                    TrafficCounter trafficCounter = trafficHandler.trafficCounter();
-                    try {
-                        TimeUnit.SECONDS.sleep(10);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                    final long totalRead = trafficCounter.cumulativeReadBytes();
-                    final long totalWrite = trafficCounter.cumulativeWrittenBytes();
-                    LOGGER.info("Total Read: {}", totalRead + " kb");
-                    LOGGER.info("Total Write: {}", totalWrite + " kb");
+    private static final GlobalTrafficShapingHandler trafficHandler = new GlobalTrafficShapingHandler(new DefaultEventLoop()) {
+
+        private final Thread MONITOR = new Thread(() -> {
+            while (true) {
+                TrafficCounter trafficCounter = trafficHandler.trafficCounter();
+                try {
+                    TimeUnit.SECONDS.sleep(10);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                 }
+                final long totalRead = trafficCounter.cumulativeReadBytes();
+                final long totalWrite = trafficCounter.cumulativeWrittenBytes();
+                LOGGER.info("Total Read: {}", totalRead + " kb");
+                LOGGER.info("Total Write: {}", totalWrite + " kb");
             }
-        }).start();
+        });
+
+        {
+            MONITOR.start();
+        }
 
 
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                while (true) {
-                    TrafficCounter trafficCounter = trafficHandler.trafficCounter();
-                    try {
-                        TimeUnit.SECONDS.sleep(5);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                    LOGGER.info("" + trafficCounter);
-                }
-            }
-        }).start();
+        @Override
+        public void channelActive(ChannelHandlerContext ctx) throws Exception {
+            super.channelActive(ctx);
+        }
+    };
 
-    }
 
     public TcpTargetSeverListener(Bootstrap proxyServerBootstrap) {
         this.proxyServerBootstrap = proxyServerBootstrap;

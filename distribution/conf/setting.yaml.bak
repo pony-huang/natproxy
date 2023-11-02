@@ -1,9 +1,9 @@
 server:
   tls:
-    enable: true
-    keyCertChainFile: D:\WorkPlace\natproxy\distribution\ssl\server\server.crt
-    keyFile: D:\WorkPlace\natproxy\distribution\ssl\server\pkcs8_server.key
-    caFile: D:\WorkPlace\natproxy\distribution\ssl\server\ca.crt
+    enable: false
+    keyCertChainFile: xxx.pem
+    keyFile: xxx.key
+    caFile: ca.pem
     port: 20002
   host: 127.0.0.1
   port: 20001
@@ -30,3 +30,11 @@ server:
       extranetPort: 55555
       type: udp
       key: 721b2e485683bd87c32f3c208f787a626c7397a759146a93be30e15ad3193084
+client:
+  key: 721b2e485683bd87c32f3c208f787a626c7397a759146a93be30e15ad3193084
+  tls:
+    enable: false
+    keyCertChainFile: xxx.pem
+    keyFile: xxx.key
+    caFile: ca.pem
+    port: 20002

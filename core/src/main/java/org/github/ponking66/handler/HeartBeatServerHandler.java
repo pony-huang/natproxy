@@ -5,8 +5,8 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
 import org.github.ponking66.proto3.NatProxyProtos;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 
 /**
@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
  */
 public class HeartBeatServerHandler extends SimpleChannelInboundHandler<NatProxyProtos.Packet> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(HeartBeatServerHandler.class);
+       private static final Logger LOGGER = LogManager.getLogger();
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, NatProxyProtos.Packet message) throws Exception {

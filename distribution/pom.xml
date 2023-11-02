@@ -34,9 +34,49 @@
 
     </dependencies>
 
+    <profiles>
+        <profile>
+            <id>windows</id>
+            <activation>
+                <os>
+                    <family>windows</family>
+                </os>
+            </activation>
+            <properties>
+                <execname>ssl_gen.bat</execname>
+            </properties>
+        </profile>
+        <profile>
+            <id>linux</id>
+            <activation>
+                <os>
+                    <family>linux</family>
+                </os>
+            </activation>
+            <properties>
+                <execname>ssl_gen.sh</execname>
+            </properties>
+        </profile>
+    </profiles>
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.1.0</version>
+                <executions>
+                    <execution>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>${project.basedir}/script/${execname}</executable>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>appassembler-maven-plugin</artifactId>
@@ -55,26 +95,29 @@
                         <platform>unix</platform>
                         <platform>windows</platform>
                     </platforms>
-                    <assembleDirectory>${project.parent.basedir}/${distribute.path}/${application.name}</assembleDirectory>
+                    <assembleDirectory>${project.parent.basedir}/${distribute.path}/${application.name}
+                    </assembleDirectory>
                     <repositoryName>lib</repositoryName>
                     <binFolder>bin</binFolder>
                     <configurationDirectory>conf</configurationDirectory>
-
+                    <logsDirectory>logs</logsDirectory>
                     <configurationSourceDirectory>${pom.basedir}/conf</configurationSourceDirectory>
+
                     <copyConfigurationDirectory>true</copyConfigurationDirectory>
                     <includeConfigurationDirectoryInClasspath>true</includeConfigurationDirectoryInClasspath>
 
                     <repositoryLayout>flat</repositoryLayout>
                     <encoding>UTF-8</encoding>
+                    <extraJvmArguments>-Xms128M -Xmx128M -Xss256k</extraJvmArguments>
                     <programs>
                         <program>
                             <mainClass>org.github.ponking66.ClientApplication</mainClass>
                             <id>client</id>
                             <jvmSettings>
                                 <extraArguments>
-                                    <extraArgument>-Xms128M</extraArgument>
-                                    <extraArgument>-Xmx128M</extraArgument>
-                                    <extraArgument>-Xss256k</extraArgument>
+                                    <extraArgument>-Dlog4j.configurationFile=@BASEDIR@/conf/log4j2.xml</extraArgument>
+                                    <extraArgument>-Dnatproxy.configFilePath=@BASEDIR@/conf/client_config.yaml
+                                    </extraArgument>
                                 </extraArguments>
                             </jvmSettings>
                         </program>
@@ -83,9 +126,9 @@
                             <id>server</id>
                             <jvmSettings>
                                 <extraArguments>
-                                    <extraArgument>-Xms128M</extraArgument>
-                                    <extraArgument>-Xmx128M</extraArgument>
-                                    <extraArgument>-Xss256k</extraArgument>
+                                    <extraArgument>-Dlog4j.configurationFile=@BASEDIR@/conf/log4j2.xml</extraArgument>
+                                    <extraArgument>-Dnatproxy.configFilePath=@BASEDIR@/conf/server_config.yaml
+                                    </extraArgument>
                                 </extraArguments>
                             </jvmSettings>
                         </program>

@@ -1,28 +1,23 @@
 server:
   tls:
     enable: false
-    keyCertChainFile: xxx.pem
-    keyFile: xxx.key
-    caFile: ca.pem
+    keyCertChainFile: ./conf/ssl/server/server.crt
+    keyFile: ./conf/ssl/server/pkcs8_server.key
+    caFile: ./conf/ssl/ca.crt
     port: 20002
   host: 127.0.0.1
   port: 20001
   keys:
     - 721b2e485683bd87c32f3c208f787a626c7397a759146a93be30e15ad3193084
   proxy:
-    - host: 192.168.31.96
+    - host: 127.0.0.1
       intranetPort: 22
       extranetPort: 22222
       type: tcp
       key: 721b2e485683bd87c32f3c208f787a626c7397a759146a93be30e15ad3193084
-    - host: 192.168.31.96
-      intranetPort: 5244
-      extranetPort: 5244
-      type: tcp
-      key: 721b2e485683bd87c32f3c208f787a626c7397a759146a93be30e15ad3193084
-    - host: 192.168.31.96
+    - host: 127.0.0.1
       intranetPort: 3306
-      extranetPort: 3306
+      extranetPort: 33060
       type: tcp
       key: 721b2e485683bd87c32f3c208f787a626c7397a759146a93be30e15ad3193084
     - host: 127.0.0.1

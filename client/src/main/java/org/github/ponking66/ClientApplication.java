@@ -15,16 +15,20 @@ import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.SslHandler;
 import io.netty.handler.timeout.IdleStateHandler;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.github.ponking66.common.ProxyConfig;
 import org.github.ponking66.common.TLSConfig;
 import org.github.ponking66.handler.*;
 import org.github.ponking66.proto3.NatProxyProtos;
 import org.github.ponking66.util.ObjectUtils;
+import org.github.ponking66.util.RequestResponseUtils;
+
 import org.github.ponking66.proto3.ProtoRequestResponseHelper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.security.Security;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -37,7 +41,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class ClientApplication implements Application {
 
-    private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
+    private static final Logger LOGGER = LogManager.getLogger();
 
     /**
      * 代理客户端启动器
@@ -57,8 +61,7 @@ public class ClientApplication implements Application {
     private final AtomicInteger errorTimes = new AtomicInteger(0);
 
     static {
-        System.setProperty(ProxyConfig.ENV_PROPERTIES_CONFIG_FILE_NAME, ProxyConfig.CLIENT_CONFIG_FILENAME);
-        System.setProperty(ProxyConfig.ENV_PROPERTIES_LOG_FILE_NAME, ProxyConfig.CLIENT_FILE_LOG);
+        Security.addProvider(new BouncyCastleProvider());
     }
 
     public static void main(String[] args) throws InterruptedException {
@@ -70,7 +73,6 @@ public class ClientApplication implements Application {
         this.host = host;
 
         workerGroup = new NioEventLoopGroup();
-
         proxyServerBootstrap.group(workerGroup)
                 .channel(NioSocketChannel.class)
                 .handler(new LoggingHandler(LogLevel.INFO))

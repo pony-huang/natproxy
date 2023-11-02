@@ -1,11 +1,11 @@
 server:
   host: 127.0.0.1
-  port: 20001
+  port: 20002
 client:
   key: 721b2e485683bd87c32f3c208f787a626c7397a759146a93be30e15ad3193084
   tls:
-    enable: false
-    keyCertChainFile: xxx.pem
-    keyFile: xxx.key
-    caFile: ca.pem
+    enable: true
+    keyCertChainFile: D:\WorkPlace\natproxy\distribution\ssl\client\client.crt
+    keyFile: D:\WorkPlace\natproxy\distribution\ssl\client\pkcs8_client.key
+    caFile: D:\WorkPlace\natproxy\distribution\ssl\client\ca.crt
     port: 20002

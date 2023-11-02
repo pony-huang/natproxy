@@ -4,11 +4,13 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelOption;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.github.ponking66.common.AttrConstants;
 import org.github.ponking66.core.ProxyChannelManager;
+import org.github.ponking66.util.RequestResponseUtils;
+
 import org.github.ponking66.proto3.ProtoRequestResponseHelper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
 
@@ -20,7 +22,7 @@ import java.net.InetSocketAddress;
  */
 public class UserTcpChannelHandler extends AbstractUserChannelHandler<ByteBuf> {
 
-    protected final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
+    private static final Logger LOGGER = LogManager.getLogger();
 
     @Override
     public void handleChannelRead(ChannelHandlerContext ctx, ByteBuf msg) {
