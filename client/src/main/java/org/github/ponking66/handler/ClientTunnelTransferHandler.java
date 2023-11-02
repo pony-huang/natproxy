@@ -20,7 +20,6 @@ import java.net.InetSocketAddress;
  */
 public class ClientTunnelTransferHandler extends ProtoHandler {
 
-    protected final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
 
     @Override
     public void handleRead(ChannelHandlerContext ctx, NatProxyProtos.Packet packet) {

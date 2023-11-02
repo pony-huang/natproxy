@@ -7,8 +7,6 @@ import io.netty.channel.ChannelHandlerContext;
 import org.github.ponking66.common.AttrConstants;
 import org.github.ponking66.core.ClientChannelManager;
 import org.github.ponking66.proto3.NatProxyProtos;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * @author pony

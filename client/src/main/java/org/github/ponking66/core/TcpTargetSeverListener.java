@@ -14,6 +14,8 @@ import io.netty.handler.traffic.TrafficCounter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.github.ponking66.handler.TargetTcpServerChannelHandler;
+import org.github.ponking66.pojo.ProxyTunnelInfoReq;
+
 import java.util.concurrent.TimeUnit;
 
 

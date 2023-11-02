@@ -5,9 +5,6 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.github.ponking66.proto3.NatProxyProtos;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 /**
  * @author pony
  * @date 2023/5/7
