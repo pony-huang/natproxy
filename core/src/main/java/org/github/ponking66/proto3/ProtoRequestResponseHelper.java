@@ -2,7 +2,6 @@ package org.github.ponking66.proto3;
 
 import com.google.protobuf.ByteString;
 import org.github.ponking66.common.ProxyConfig;
-import org.github.ponking66.pojo.ProxyTunnelInfoReq;
 import org.github.ponking66.util.ObjectUtils;
 
 import java.net.InetSocketAddress;
@@ -146,13 +145,13 @@ public class ProtoRequestResponseHelper {
         return NatProxyProtos.Packet.newBuilder().setHeader(header).setCloseChannelRequest(body).build();
     }
 
-    public static NatProxyProtos.Packet connect(ProxyTunnelInfoReq proxyTunnelInfoReq) {
 
+    public static NatProxyProtos.Packet connect(String host, int port, String type, String userId) {
         NatProxyProtos.ProxyTunnelInfoRequest.Builder body = NatProxyProtos.ProxyTunnelInfoRequest.newBuilder()
-                .setHost(proxyTunnelInfoReq.getHost())
-                .setPort(proxyTunnelInfoReq.getPort())
-                .setType(proxyTunnelInfoReq.getType())
-                .setUserId(proxyTunnelInfoReq.getUserId());
+                .setHost(host)
+                .setPort(port)
+                .setType(type)
+                .setUserId(userId);
 
         NatProxyProtos.Header.Builder header = NatProxyProtos.Header.newBuilder()
                 .setType(NatProxyProtos.Header.MessageType.CONNECT_REQUEST)

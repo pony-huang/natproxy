@@ -1,4 +1,4 @@
-package org.github.ponking66.pojo;
+package org.github.ponking66.common;
 
 import lombok.Data;
 
@@ -10,7 +10,7 @@ import java.io.Serializable;
  * @date 2023/5/15
  */
 @Data
-public class ProxyTunnelInfoResp implements Serializable {
+public class ClientProxyConfig implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 42L;
@@ -22,4 +22,6 @@ public class ProxyTunnelInfoResp implements Serializable {
     private String userId;
 
     private String token;
+
+    private String type;
 }

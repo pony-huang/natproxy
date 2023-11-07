@@ -14,7 +14,6 @@ import io.netty.handler.traffic.TrafficCounter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.github.ponking66.handler.TargetTcpServerChannelHandler;
-import org.github.ponking66.pojo.ProxyTunnelInfoReq;
 
 import java.util.concurrent.TimeUnit;
 
@@ -82,11 +81,11 @@ public class TcpTargetSeverListener implements TargetServerListener {
     }
 
     @Override
-    public void listen(Channel cmdChannel, ProxyTunnelInfoReq proxyTunnelInfoReq) {
-        final String userId = proxyTunnelInfoReq.getUserId();
-        // 目标服务器的 ip 和 port
-        String ip = proxyTunnelInfoReq.getHost();
-        int port = proxyTunnelInfoReq.getPort();
+    public void listen(Channel cmdChannel,String userId, String ip , int port) {
+//        final String userId = proxyTunnelInfoReq.getUserId();
+//        // 目标服务器的 ip 和 port
+//        String ip = proxyTunnelInfoReq.getHost();
+//        int port = proxyTunnelInfoReq.getPort();
         // 连接目标服务器
         targetServerBootstrap.connect(ip, port).addListener(new TargetServerChannelFutureListener(cmdChannel, userId, proxyServerBootstrap));
     }

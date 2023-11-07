@@ -6,7 +6,6 @@ import io.netty.channel.ChannelHandlerContext;
 import org.github.ponking66.core.TargetServerListener;
 import org.github.ponking66.core.TcpTargetSeverListener;
 import org.github.ponking66.core.UdpTargetSeverListener;
-import org.github.ponking66.pojo.ProxyTunnelInfoReq;
 import org.github.ponking66.proto3.NatProxyProtos;
 import org.github.ponking66.proto3.ProtocType;
 
@@ -36,18 +35,17 @@ public class ClientTunnelBindHandler extends ProtoHandler {
         NatProxyProtos.ProxyTunnelInfoRequest request = packet.getProxyTunnelInfoRequest();
         Channel cmdChannel = ctx.channel();
         String type = request.getType();
-        ProxyTunnelInfoReq message = new ProxyTunnelInfoReq();
 
-        message.setHost(request.getHost());
-        message.setPort(request.getPort());
-        message.setToken(request.getToken());
-        message.setType(request.getType());
-        message.setUserId(request.getUserId());
+        String host = request.getHost();
+        int port = request.getPort();
+//        String token = request.getToken();
+//        String type1 = request.getType();
+        String userId = request.getUserId();
 
         if (ProtocType.TCP.equals(type)) {
-            tcpTargetSeverListener.listen(cmdChannel, message);
+            tcpTargetSeverListener.listen(cmdChannel, userId, host, port);
         } else if (ProtocType.UDP.equals(type)) {
-            udpTargetSeverListener.listen(cmdChannel, message);
+            udpTargetSeverListener.listen(cmdChannel, userId, host, port);
         } else {
             LOGGER.warn("Illegal agreement. ProtocType value is {}.", type);
         }

@@ -1,7 +1,5 @@
 package org.github.ponking66.common;
 
-import org.github.ponking66.pojo.ProxyTunnelInfoReq;
-
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
@@ -39,17 +37,17 @@ public class ProxyConfig {
         }
     }
 
-    public static ProxyTunnelInfoReq getProxyInfo(int port) {
-        ProxyTunnelInfoReq proxyTunnelInfoReq = null;
+    public static ClientProxyConfig getProxyInfo(int port) {
+        ClientProxyConfig clientProxyConfig = null;
         for (Proxy p : CONFIG_INFO.getServer().getProxy()) {
             if (p.getExtranetPort() == port) {
-                proxyTunnelInfoReq = new ProxyTunnelInfoReq();
-                proxyTunnelInfoReq.setHost(p.getHost());
-                proxyTunnelInfoReq.setPort(p.getIntranetPort());
-                proxyTunnelInfoReq.setType(p.getType());
+                clientProxyConfig = new ClientProxyConfig();
+                clientProxyConfig.setHost(p.getHost());
+                clientProxyConfig.setPort(p.getIntranetPort());
+                clientProxyConfig.setType(p.getType());
             }
         }
-        return proxyTunnelInfoReq;
+        return clientProxyConfig;
     }
 
     public static List<Integer> getClientKeyExtranetPort(String key) {

@@ -9,7 +9,7 @@ import org.apache.logging.log4j.Logger;
 import org.github.ponking66.common.AttrConstants;
 import org.github.ponking66.common.ProxyConfig;
 import org.github.ponking66.core.ProxyChannelManager;
-import org.github.ponking66.pojo.ProxyTunnelInfoReq;
+import org.github.ponking66.common.ClientProxyConfig;
 import org.github.ponking66.proto3.ProtoRequestResponseHelper;
 
 import java.net.InetSocketAddress;
@@ -47,13 +47,15 @@ public abstract class AbstractUserChannelHandler<T> extends SimpleChannelInbound
             // 用户连接到代理服务器时，设置用户连接不可读，等待代理后端服务器连接成功后再改变为可读状态
             userChannel.config().setOption(ChannelOption.AUTO_READ, false);
             // 内网服务信息 ip:port
-            ProxyTunnelInfoReq proxyTunnelInfoReq = ProxyConfig.getProxyInfo(localAddress.getPort());
+            ClientProxyConfig clientProxyConfig = ProxyConfig.getProxyInfo(localAddress.getPort());
             String userId = ProxyChannelManager.newUserId();
-            proxyTunnelInfoReq.setUserId(userId);
             // 给 cmdChannel 添加和客户端连接关系
             ProxyChannelManager.addUserChannelToCmdChannel(cmdChannel, userId, userChannel);
             // 通知代理客户端，可以连接代理端口了
-            cmdChannel.writeAndFlush(ProtoRequestResponseHelper.connect(proxyTunnelInfoReq));
+            cmdChannel.writeAndFlush(ProtoRequestResponseHelper.connect(
+                    clientProxyConfig.getHost(),
+                    clientProxyConfig.getPort(),
+                    clientProxyConfig.getType(), userId));
         }
         super.channelActive(ctx);
     }

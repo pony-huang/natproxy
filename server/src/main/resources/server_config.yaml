@@ -1,6 +1,6 @@
 server:
   tls:
-    enable: true
+    enable: false
     keyCertChainFile: D:\WorkPlace\natproxy\distribution\ssl\server\server.crt
     keyFile: D:\WorkPlace\natproxy\distribution\ssl\server\pkcs8_server.key
     caFile: D:\WorkPlace\natproxy\distribution\ssl\server\ca.crt

@@ -6,7 +6,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.github.ponking66.common.AttrConstants;
 import org.github.ponking66.common.ProxyConfig;
-import org.github.ponking66.pojo.ProxyTunnelInfoReq;
+import org.github.ponking66.common.ClientProxyConfig;
 
 
 import java.net.InetSocketAddress;
@@ -43,7 +43,7 @@ public class ProxyChannelManager {
     /**
      * 目标服务器ip和端口信息，ip:port
      */
-    public static final AttributeKey<ProxyTunnelInfoReq> TARGET_SERVER_INFO = AttributeKey.newInstance("target_server_info");
+    public static final AttributeKey<ClientProxyConfig> TARGET_SERVER_INFO = AttributeKey.newInstance("target_server_info");
 
     /**
      * cmdChannel 对应的端口列表
@@ -112,10 +112,10 @@ public class ProxyChannelManager {
      */
     public static void addUserChannelToCmdChannel(Channel cmdChannel, String userId, Channel userChannel) {
         InetSocketAddress sa = (InetSocketAddress) userChannel.localAddress();
-        ProxyTunnelInfoReq proxyTunnelInfoReq = ProxyConfig.getProxyInfo(sa.getPort());
+        ClientProxyConfig clientProxyConfig = ProxyConfig.getProxyInfo(sa.getPort());
         // 绑定关系
         userChannel.attr(AttrConstants.USER_ID).set(userId);
-        userChannel.attr(TARGET_SERVER_INFO).set(proxyTunnelInfoReq);
+        userChannel.attr(TARGET_SERVER_INFO).set(clientProxyConfig);
         cmdChannel.attr(USER_CHANNELS).get().put(userId, userChannel);
     }
 
