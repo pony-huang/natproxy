@@ -6,6 +6,7 @@ import lombok.ToString;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.github.ponking66.util.ResourceUtils;
+import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
 
@@ -36,7 +37,7 @@ public class ConfigInfo {
         if (CONFIG_INFO == null) {
             synchronized (ConfigInfo.class) {
                 if (CONFIG_INFO == null) {
-                    Constructor constructor = new Constructor(ConfigInfo.class);
+                    Constructor constructor = new Constructor(ConfigInfo.class, new LoaderOptions());
                     Yaml yaml = new Yaml(constructor);
                     String filePath = System.getProperty(ProxyConfig.ENV_PROPERTIES_CONFIG_FILE_NAME);
                     InputStream is = new FileInputStream(new File(filePath));
