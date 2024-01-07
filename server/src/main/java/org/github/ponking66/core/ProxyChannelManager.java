@@ -103,6 +103,31 @@ public class ProxyChannelManager {
     }
 
     /**
+     * 设置属性，如果值为null则抛出异常
+     *
+     * @param channel 通道
+     * @param key     属性键
+     * @param value   属性值
+     */
+    private static <T> void setAttribute(Channel channel, AttributeKey<T> key, T value) {
+        if (value == null) {
+            throw new IllegalArgumentException("Attribute value cannot be null");
+        }
+        channel.attr(key).set(value);
+    }
+
+    /**
+     * 获取属性，如果值为null则返回默认值
+     *
+     * @param channel 通道
+     * @param key     属性键
+     * @return 属性值或默认值
+     */
+    private static <T> T getAttribute(Channel channel, AttributeKey<T> key) {
+        return channel.attr(key).get();
+    }
+
+    /**
      * 增加 用户连接与代理客户端连接关系
      *
      * @param cmdChannel  代理客户端连接
@@ -112,10 +137,12 @@ public class ProxyChannelManager {
     public static void addUserChannelToCmdChannel(Channel cmdChannel, String userId, Channel userChannel) {
         InetSocketAddress sa = (InetSocketAddress) userChannel.localAddress();
         ProxyTunnelInfoReq proxyTunnelInfoReq = ProxyConfig.getProxyInfo(sa.getPort());
-        // 绑定关系
-        userChannel.attr(AttrConstants.USER_ID).set(userId);
-        userChannel.attr(TARGET_SERVER_INFO).set(proxyTunnelInfoReq);
-        cmdChannel.attr(USER_CHANNELS).get().put(userId, userChannel);
+        // 绑定用户ID到用户channel属性
+        setAttribute(userChannel, AttrConstants.USER_ID, userId);
+        // 绑定代理隧道信息到用户channel属性
+        setAttribute(userChannel, TARGET_SERVER_INFO, proxyTunnelInfoReq);
+        // 绑定用户channel到命令通道属性
+        getAttribute(cmdChannel, USER_CHANNELS).put(userId, userChannel);
     }
 
     /**
@@ -158,11 +185,11 @@ public class ProxyChannelManager {
     }
 
     /**
-     * 删除用户连接与代理客户端连接关系
+     * 从代理客户端连接中移除用户连接关系
      *
      * @param cmdChannel 代理客户端连接
-     * @param userId     用户连接
-     * @return 用户连接
+     * @param userId     用户连接标识
+     * @return 是否成功移除用户连接
      */
     public static Channel removeUserChannelFromCmdChannel(Channel cmdChannel, String userId) {
         if (cmdChannel.attr(USER_CHANNELS).get() == null) {
@@ -247,12 +274,18 @@ public class ProxyChannelManager {
         // 如果有两个线程分别调用put和remove方法，就无法保证线程安全了
         synchronized (portCmdChannelMapping) {
             for (int port : ports) {
-                portCmdChannelMapping.put(port, cmdChannel);
+                if (!portCmdChannelMapping.containsKey(port)) { // 避免覆盖现有的映射
+                    portCmdChannelMapping.put(port, cmdChannel);
+                } else {
+                    throw new IllegalArgumentException("Port " + port + " already exists in the mapping.");
+                }
             }
         }
-        cmdChannel.attr(CHANNEL_PORT).set(ports);
-        cmdChannel.attr(CHANNEL_CLIENT_KEY).set(clientKey);
-        cmdChannel.attr(USER_CHANNELS).set(new ConcurrentHashMap<>());
+        synchronized (cmdChannels) { // 同步访问cmdChannels
+            cmdChannel.attr(CHANNEL_PORT).set(ports);
+            cmdChannel.attr(CHANNEL_CLIENT_KEY).set(clientKey);
+            cmdChannel.attr(USER_CHANNELS).set(new ConcurrentHashMap<>());
+        }
         // 缓存 cmdChannel
         cmdChannels.put(clientKey, cmdChannel);
     }
