@@ -8,7 +8,6 @@ import org.github.ponking66.common.AttrConstants;
 import org.github.ponking66.common.ProxyConfig;
 import org.github.ponking66.pojo.ProxyTunnelInfoReq;
 
-
 import java.net.InetSocketAddress;
 import java.util.List;
 import java.util.Map;
@@ -26,7 +25,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class ProxyChannelManager {
 
-       private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogManager.getLogger();
 
     /**
      * 用户唯一标识 生成器
@@ -175,14 +174,16 @@ public class ProxyChannelManager {
         }
     }
 
+
     /**
-     * 代理客户端连接断开后，清除 cmdChannel
+     * 代理客户端连接断开后，执行一系列清理工作。
      *
      * @param channel cmdChannel
      */
     public static void removeCmdChannel(Channel channel) {
         LOGGER.warn("Proxy channel closed, clear user channels, {}", channel);
-        // 如果 cmdChannel 没有开放任何端口
+
+        // 如果 cmdChannel 没有开放任何端口，则直接返回
         if (channel.attr(CHANNEL_PORT).get() == null) {
             return;
         }
@@ -190,17 +191,17 @@ public class ProxyChannelManager {
         String clientKey = channel.attr(CHANNEL_CLIENT_KEY).get();
         // 移除缓存的 cmdChannel
         Channel cacheCmdChannel = cmdChannels.remove(clientKey);
-        if (channel != cacheCmdChannel) {
-            cmdChannels.put(clientKey, channel);
+        if (cacheCmdChannel != null && cacheCmdChannel != channel) {
+            // 根据实际需求决定是否要重新放入，这里选择不放入
+            // cmdChannels.put(clientKey, channel);
         }
 
-        // 移除缓存的 cmdChannel
         List<Integer> ports = channel.attr(CHANNEL_PORT).get();
         for (int port : ports) {
             Channel cmdChannel = portCmdChannelMapping.remove(port);
-            // 在执行断连之前新的连接已经连上来了
-            if (cmdChannel != channel) {
-                portCmdChannelMapping.put(port, cmdChannel);
+            if (cmdChannel != null && cmdChannel != channel) {
+                // 根据实际需求决定是否要重新放入，这里选择不放入
+                // portCmdChannelMapping.put(port, cmdChannel);
             }
         }
 
@@ -228,6 +229,7 @@ public class ProxyChannelManager {
             }
         }
     }
+
 
     /**
      * 增加代理服务器端口与代理控制客户端连接的映射关系
