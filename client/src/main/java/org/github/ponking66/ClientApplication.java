@@ -23,8 +23,9 @@ import org.github.ponking66.protoctl.NettyMessageEncoder;
 import org.github.ponking66.util.ObjectUtils;
 import org.github.ponking66.util.RequestResponseUtils;
 
-
+import javax.net.ssl.SSLException;
 import java.io.File;
+import java.io.IOException;
 import java.security.Security;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -53,7 +54,7 @@ public class ClientApplication implements Application {
 
     private final ExecutorService executor = Executors.newScheduledThreadPool(1);
 
-    private volatile boolean isSuccess = false;
+    private volatile boolean isConnectedSuccessfully = false;
 
     private final AtomicInteger errorTimes = new AtomicInteger(0);
 
@@ -66,6 +67,12 @@ public class ClientApplication implements Application {
     }
 
     public ClientApplication(String host, int port) {
+        if (host == null || host.isEmpty()) {
+            throw new IllegalArgumentException("Host cannot be null or empty");
+        }
+        if (port < 0 || port > 65535) {
+            throw new IllegalArgumentException("Port is out of range");
+        }
         this.port = port;
         this.host = host;
 
@@ -77,16 +84,22 @@ public class ClientApplication implements Application {
                     @Override
                     protected void initChannel(SocketChannel ch) throws Exception {
                         ChannelPipeline pipeline = ch.pipeline();
-
                         TLSConfig tls = ProxyConfig.client().getTls();
                         if (isTlsEnable(tls)) {
                             File crt = new File(tls.getKeyCertChainFile());
                             File key = new File(tls.getKeyFile());
                             File ca = new File(tls.getCaFile());
-                            SslContext sslContext = SslContextBuilder.forClient().keyManager(crt, key).trustManager(ca).build();
+                            if (!crt.exists() || !crt.canRead() || !key.exists() || !key.canRead() || !ca.exists() || !ca.canRead()) {
+                                throw new IOException("TLS files are not valid or not readable");
+                            }
+                            SslContext sslContext;
+                            try {
+                                sslContext = SslContextBuilder.forClient().keyManager(crt, key).trustManager(ca).build();
+                            } catch (SSLException e) {
+                                throw new RuntimeException("Failed to create SslContext", e);
+                            }
                             pipeline.addLast(new SslHandler(sslContext.newEngine(ch.alloc())));
                         }
-
                         pipeline.addLast(new NettyMessageDecoder());
                         pipeline.addLast(new NettyMessageEncoder());
                         pipeline.addLast(new IdleStateHandler(ProxyConfig.READER_IDLE_TIME_SECONDS, ProxyConfig.WRITER_IDLE_TIME_SECONDS, ProxyConfig.ALL_IDLE_TIME_SECONDS));
@@ -100,6 +113,7 @@ public class ClientApplication implements Application {
                 });
     }
 
+
     private static boolean isTlsEnable(TLSConfig tls) {
         return tls != null && tls.isEnable() &&
                 ObjectUtils.isNotEmpty(tls.getCaFile()) &&
@@ -110,10 +124,10 @@ public class ClientApplication implements Application {
     public void connect() throws InterruptedException {
         ChannelFuture cf = proxyServerBootstrap.connect(host, port);
         executor.execute(() -> {
-            while (!isSuccess) {
+            while (!isConnectedSuccessfully) {
                 try {
                     TimeUnit.SECONDS.sleep(1);
-                    if (!isSuccess) {
+                    if (!isConnectedSuccessfully) {
                         LOGGER.info("Connection wait");
                     }
                 } catch (InterruptedException e) {
@@ -125,13 +139,11 @@ public class ClientApplication implements Application {
             Channel channel = future.channel();
             if (future.isSuccess()) {
                 LOGGER.info("Successful connection");
-                // Reset
-                isSuccess = true;
+                isConnectedSuccessfully = true;
                 errorTimes.set(0);
                 // Login
                 NettyMessage message = RequestResponseUtils.loginRep(ProxyConfig.client().getKey());
                 channel.writeAndFlush(message);
-
             } else {
                 long delay = delay();
                 LOGGER.info("Connection failure, try again after {} milliseconds", delay);
@@ -139,17 +151,12 @@ public class ClientApplication implements Application {
                     try {
                         connect();
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        // Handle exception, e.g., print stack trace or log the error.
+                        LOGGER.error("Failed to connect", e);
                     }
                 }, delay, TimeUnit.MILLISECONDS);
-                isSuccess = false;
+                isConnectedSuccessfully = false;
                 errorTimes.incrementAndGet();
-            }
-        });
-        cf.addListener(new ChannelFutureListener() {
-            @Override
-            public void operationComplete(ChannelFuture channelFuture) throws Exception {
-                //TODO
             }
         });
         cf.channel().closeFuture().sync();
@@ -178,7 +185,7 @@ public class ClientApplication implements Application {
         try {
             workerGroup.shutdownGracefully();
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error("Failed to stop", e);
         }
     }
 }

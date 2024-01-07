@@ -28,7 +28,7 @@ public class RequestResponseUtils {
     public static NettyMessage transferResp(byte[] data, String userId, InetSocketAddress inetSocketAddress) {
         NettyMessage message = new NettyMessage();
         message.setHeader(new Header().setType(MessageType.TRANSFER_RESPONSE));
-        TransferResp resp = new TransferResp(userId, data);
+        TransferResp resp = new TransferResp(userId, inetSocketAddress.getHostName(), inetSocketAddress.getPort(), data);
         resp.setRemoteAddress(inetSocketAddress);
         message.setBody(resp);
         return message;
@@ -61,7 +61,7 @@ public class RequestResponseUtils {
         return proxyMessage;
     }
 
-    public static NettyMessage loginResp(LoginResp.RespError error, Header.Status status) {
+    public static NettyMessage loginResp(String error, Header.Status status) {
         NettyMessage message = new NettyMessage();
         Header header = new Header();
         header.setType(MessageType.LOGIN_RESPONSE);

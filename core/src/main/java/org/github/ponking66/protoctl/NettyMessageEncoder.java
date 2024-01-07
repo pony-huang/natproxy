@@ -3,7 +3,7 @@ package org.github.ponking66.protoctl;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
-import org.github.ponking66.util.MarshallerUtils;
+import org.github.ponking66.pojo.BodyBuffer;
 
 /**
  * @author pony
@@ -43,7 +43,9 @@ public final class NettyMessageEncoder extends MessageToByteEncoder<NettyMessage
         if (msg.getBody() != null) {
             int lengthPosition = byteBuf.writerIndex();
             byteBuf.writeBytes(LENGTH_PLACEHOLDER);
-            MarshallerUtils.writeObject(msg.getBody(), byteBuf);
+            BodyBuffer byteBuffer = (BodyBuffer) msg.getBody();
+            byte[] content = byteBuffer.read();
+            byteBuf.writeBytes(content);
             byteBuf.setInt(lengthPosition, byteBuf.writerIndex() - lengthPosition - 4);
         } else {
             byteBuf.writeInt(0);

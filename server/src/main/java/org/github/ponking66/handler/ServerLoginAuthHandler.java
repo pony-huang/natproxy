@@ -6,7 +6,6 @@ import org.github.ponking66.core.ProxyChannelManager;
 import org.github.ponking66.core.ProxyChannelManagerFactory;
 import org.github.ponking66.core.UserApplication;
 import org.github.ponking66.pojo.LoginReq;
-import org.github.ponking66.pojo.LoginResp;
 import org.github.ponking66.protoctl.Header;
 import org.github.ponking66.protoctl.MessageType;
 import org.github.ponking66.protoctl.NettyMessage;
@@ -34,7 +33,7 @@ public class ServerLoginAuthHandler extends Handler {
             String clientKey = rep.getClientKey();
             if (!ProxyChannelManagerFactory.getProxyChannelManager().containsKey(clientKey)) {
                 LOGGER.info("Authentication failure");
-                ctx.writeAndFlush(RequestResponseUtils.loginResp(LoginResp.RespError.CLIENT_KEY_ERROR, Header.Status.FAILED));
+                ctx.writeAndFlush(RequestResponseUtils.loginResp("client key is error.", Header.Status.FAILED));
                 ctx.close();
             } else {
                 LOGGER.info("Authentication success, clientKey: {}", clientKey);
@@ -62,7 +61,7 @@ public class ServerLoginAuthHandler extends Handler {
         // 授权失败，cmdChannel 已经存在
         if (cacheCmdChannel != null) {
             LOGGER.warn("Channel already exists for clientKey, channel: {}, clientKey: {}", cacheCmdChannel, clientKey);
-            ctx.writeAndFlush(RequestResponseUtils.loginResp(LoginResp.RespError.LOGGED, Header.Status.FAILED));
+            ctx.writeAndFlush(RequestResponseUtils.loginResp("failed to login.", Header.Status.FAILED));
             ctx.close();
             return;
         }
