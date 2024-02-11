@@ -107,7 +107,7 @@
 
                     <repositoryLayout>flat</repositoryLayout>
                     <encoding>UTF-8</encoding>
-                    <extraJvmArguments>-Xms128M -Xmx128M -Xss256k</extraJvmArguments>
+                    <extraJvmArguments>-Dlog4j.skipJansi=false -Xms128M -Xmx128M -Xss256k</extraJvmArguments>
                     <programs>
                         <program>
                             <mainClass>org.github.ponking66.ClientApplication</mainClass>

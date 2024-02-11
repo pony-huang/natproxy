@@ -45,7 +45,7 @@ public abstract class UserApplication {
         for (int port : ports) {
             try {
                 start(port);
-                LOGGER.debug("Registered user port[{}], clientKey[{}]", port, clientKey);
+                LOGGER.info("Registered user port[{}], clientKey[{}]", port, clientKey);
             } catch (Exception ex) {
                 // 该端口已经绑定过，直接忽略
                 // 如果不是 BindException，抛出异常

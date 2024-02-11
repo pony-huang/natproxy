@@ -9,8 +9,8 @@
         </Console>
         <RollingRandomAccessFile name="RollingRandomAccessFile"
                                  fileName="${LOG_HOME}/${FILE_NAME}"
-                                 filePattern="${LOG_HOME}/${date:yyyy-MM}/${FILE_NAME}-%d{yyyy-MM-dd HH-mm}-%i">
-            <PatternLayout pattern="%p - %d{yyyy-MM-dd HH:mm:ss} - %t - %c{1.} - %m%n" />
+                                 filePattern="${LOG_HOME}/$${date:yyyy-MM}/${FILE_NAME}-%d{yyyy-MM-dd HH-mm}-%i">
+            <PatternLayout pattern="%p - %d{yyyy-MM-dd HH:mm:ss} - [%t] - %c{1.} - %m%n" />
             <Policies>
                 <TimeBasedTriggeringPolicy interval="1" />
                 <SizeBasedTriggeringPolicy size="10 MB" />

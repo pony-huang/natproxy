@@ -1,18 +1,16 @@
 <Configuration status="WARN" monitorInterval="300">
     <properties>
-        <!--        https://www.mojohaus.org/appassembler/appassembler-maven-plugin/usage-script.html--> ${sys:basedir}
         <property name="LOG_HOME">${sys:basedir}/logs/</property>
         <property name="FILE_NAME">${natproxy:log.filename}</property>
     </properties>
     <Appenders>
         <Console name="Console" target="SYSTEM_OUT">
-            <PatternLayout
-                    pattern="%highlight{%d{HH:mm:ss.SSS} - %msg%n}{FATAL=red blink, ERROR=red, WARN=yellow bold, INFO=green, DEBUG=blue bold, TRACE=white}"/>
+            <PatternLayout pattern="%d{HH:mm:ss.SSS} [%-5level] %logger{1.} - %msg%n"/>
         </Console>
         <RollingFile name="RollingFile"
                      fileName="${LOG_HOME}/${FILE_NAME}"
                      filePattern="${LOG_HOME}/$${date:yyyy-MM}/${FILE_NAME}-%d{yyyy-MM-dd HH-mm}-%i">
-            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} - %c{1.} - %m%n"/>
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} [%-5level] %logger{1.} - %msg%n"/>
             <Policies>
                 <TimeBasedTriggeringPolicy interval="1"/>
                 <SizeBasedTriggeringPolicy size="50MB"/>
@@ -21,11 +19,11 @@
     </Appenders>
 
     <Loggers>
-        <Logger name="org.github.ponking66" level="info"/>
-        <root level="info">
-            <appender-ref ref="Console"/>
-            <appender-ref ref="RollingFile"/>
-        </root>
+        <Logger name="org.github.ponking66" level="INFO"/>
+        <Root level="INFO">
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="RollingFile"/>
+        </Root>
     </Loggers>
 
 </Configuration>
