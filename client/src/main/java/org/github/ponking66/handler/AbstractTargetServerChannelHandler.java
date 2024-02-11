@@ -9,7 +9,6 @@ import org.apache.logging.log4j.Logger;
 import org.github.ponking66.common.AttrConstants;
 
 
-
 /**
  * 处理代理客户端和目标服务器Message的Handler
  *
@@ -19,6 +18,7 @@ import org.github.ponking66.common.AttrConstants;
 public abstract class AbstractTargetServerChannelHandler<T> extends SimpleChannelInboundHandler<T> {
 
     private static final Logger LOGGER = LogManager.getLogger();
+
 
     /**
      * 平衡读写速度

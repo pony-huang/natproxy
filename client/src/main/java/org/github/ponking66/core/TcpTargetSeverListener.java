@@ -2,22 +2,16 @@ package org.github.ponking66.core;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
-import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInitializer;
-import io.netty.channel.DefaultEventLoop;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
-import io.netty.handler.traffic.GlobalTrafficShapingHandler;
-import io.netty.handler.traffic.TrafficCounter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.github.ponking66.handler.TargetTcpServerChannelHandler;
 import org.github.ponking66.pojo.ProxyTunnelInfoReq;
 import org.github.ponking66.protoctl.NettyMessage;
-
-import java.util.concurrent.TimeUnit;
 
 
 /**
@@ -39,35 +33,6 @@ public class TcpTargetSeverListener implements TargetServerListener {
     protected final Bootstrap proxyServerBootstrap;
 
 
-    private static final GlobalTrafficShapingHandler trafficHandler = new GlobalTrafficShapingHandler(new DefaultEventLoop()) {
-
-        private final Thread MONITOR = new Thread(() -> {
-            while (true) {
-                TrafficCounter trafficCounter = trafficHandler.trafficCounter();
-                try {
-                    TimeUnit.SECONDS.sleep(10);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                final long totalRead = trafficCounter.cumulativeReadBytes();
-                final long totalWrite = trafficCounter.cumulativeWrittenBytes();
-                LOGGER.info("Total Read: {}", totalRead + " kb");
-                LOGGER.info("Total Write: {}", totalWrite + " kb");
-            }
-        });
-
-        {
-            MONITOR.start();
-        }
-
-
-        @Override
-        public void channelActive(ChannelHandlerContext ctx) throws Exception {
-            super.channelActive(ctx);
-        }
-    };
-
-
     public TcpTargetSeverListener(Bootstrap proxyServerBootstrap) {
         this.proxyServerBootstrap = proxyServerBootstrap;
         targetServerBootstrap.group(proxyServerBootstrap.config().group())
@@ -76,7 +41,6 @@ public class TcpTargetSeverListener implements TargetServerListener {
                 .handler(new ChannelInitializer<SocketChannel>() {
                     @Override
                     protected void initChannel(SocketChannel ch) throws Exception {
-                        ch.pipeline().addLast(trafficHandler);
                         ch.pipeline().addLast(new TargetTcpServerChannelHandler());
                     }
                 });

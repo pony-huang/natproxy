@@ -15,7 +15,6 @@ import org.github.ponking66.protoctl.NettyMessage;
 import org.github.ponking66.util.RequestResponseUtils;
 
 
-
 /**
  * 处理代理客户端和目标服务器（TCP）
  *
@@ -26,10 +25,6 @@ public class TargetTcpServerChannelHandler extends AbstractTargetServerChannelHa
 
     private static final Logger LOGGER = LogManager.getLogger();
 
-    @Override
-    public void channelActive(ChannelHandlerContext ctx) throws Exception {
-        super.channelActive(ctx);
-    }
 
     /**
      * 读取目标服务器的消息，写给代理服务器
