@@ -22,7 +22,10 @@ jobs:
       - name: Build with Maven
         run: mvn -B package --file pom.xml -DskipTests=true
       # Upload artifact as a release asset
+      - uses: actions/upload-artifact@v4
       - name: Upload Release Asset
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release upload ${{ github.event.release.tag_name }} ./build/natproxy/*
+        with:
+          name: natproxy
+          path: ${{ github.workspace }}/build/natproxy/*
+          compression-level: 9
+          overwrite: true
