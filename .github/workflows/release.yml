@@ -1,0 +1,28 @@
+name: Release
+on:
+  release:
+    types: [prereleased, released]
+jobs:
+  realse:
+    name: Released Plugin
+    runs-on: ubuntu-latest
+    steps:
+      # Setup Java environment for the next steps
+      - uses: actions/checkout@v3
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
+      # Set Permission
+      - name: Grant execution permissions
+        run: chmod +x ./distribution/script/ssl_gen.sh
+      # build
+      - name: Build with Maven
+        run: mvn -B package --file pom.xml -DskipTests=true
+      # Upload artifact as a release asset
+      - name: Upload Release Asset
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload ${{ github.event.release.tag_name }} ./build/natproxy/*
